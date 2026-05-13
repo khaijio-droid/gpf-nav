@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPF NAV — มูลค่ากองทุน กบข.</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--surface:#141720;--surface2:#1c2030;--border:#252a3a;--border2:#2e3548;--text:#e8ecf5;--text2:#8b92a8;--text3:#555e78;--accent:#4f8ef7;--accent2:#3a6fd8;--up:#34d87a;--dn:#f55353;--gold:#f5c842;--mono:"IBM Plex Mono",monospace;--sans:"IBM Plex Sans Thai",sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.22;pointer-events:none}
+.page{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:32px 20px 60px}
+.header{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+.htitle{font-size:22px;font-weight:600;letter-spacing:-.3px;margin-bottom:6px}
+.htitle span{color:var(--accent)}
+.hsub{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.hright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:6px 12px;font-family:var(--mono);font-size:12px;color:var(--text2)}
+.badge strong{color:var(--gold)}
+.btn{display:flex;align-items:center;gap:6px;border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:background .15s,transform .1s}
+.btn-blue{background:var(--accent);color:#fff}.btn-blue:hover{background:var(--accent2)}
+.btn-blue.loading{opacity:.6;pointer-events:none}
+.btn svg{width:14px;height:14px}
+.spinning{animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.tabs{display:flex;gap:4px;margin-bottom:22px;flex-wrap:wrap}
+.tab{padding:7px 16px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text3);font-family:var(--sans);transition:all .15s}
+.tab:hover{background:var(--surface2);color:var(--text2)}
+.tab.active{background:var(--surface2);border-color:var(--accent);color:var(--accent)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px;margin-bottom:22px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.clabel{font-size:11px;color:var(--text3);margin-bottom:6px}
+.cval{font-size:20px;font-weight:600;font-family:var(--mono);line-height:1}
+.cval.up{color:var(--up)}.cval.dn{color:var(--dn)}.cval.gold{color:var(--gold)}
+.csub{font-size:11px;color:var(--text3);margin-top:4px;font-family:var(--mono)}
+.twrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.thead2{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px}
+.thead2 h3{font-size:12px;font-weight:500;color:var(--text2)}
+.sbtns{display:flex;gap:4px}
+.sbtn{font-size:11px;padding:4px 10px;border-radius:4px;border:1px solid var(--border2);background:transparent;color:var(--text3);cursor:pointer;font-family:var(--sans);transition:all .15s}
+.sbtn:hover{color:var(--text2);background:var(--surface2)}
+.sbtn.active{color:var(--accent);border-color:var(--accent);background:rgba(79,142,247,.08)}
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 13px;text-align:right;font-size:10px;font-weight:500;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+thead th:first-child{text-align:left}
+thead th.tc{text-align:center;width:34px}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+td{padding:10px 13px;text-align:right;font-size:13px;color:var(--text)}
+td:first-child{text-align:left}
+td.tc{text-align:center}
+.pname{display:flex;align-items:center;gap:8px}
+.pdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.rnum{font-size:11px;color:var(--text3);font-family:var(--mono)}
+.nnum{font-family:var(--mono);font-size:13px}
+.ncur{color:var(--text);font-weight:500}.nref{color:var(--text3)}
+.chg{display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.cv{font-family:var(--mono);font-size:13px;font-weight:500;min-width:54px;text-align:right}
+.cv.up{color:var(--up)}.cv.dn{color:var(--dn)}
+.bbg{width:60px;height:4px;background:var(--border2);border-radius:2px;overflow:hidden;flex-shrink:0}
+.bin{height:4px;border-radius:2px;transition:width .5s}
+.bin.up{background:var(--up)}.bin.dn{background:var(--dn)}
+.sbox{padding:56px 20px;text-align:center;font-size:14px;color:var(--text3)}
+.sring{width:30px;height:30px;margin:0 auto 14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+.ebox{margin:20px;padding:16px 18px;background:rgba(245,83,83,.06);border:1px solid rgba(245,83,83,.25);border-radius:8px;color:var(--dn);font-size:13px;line-height:1.9}
+.tfooter{padding:9px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fi{animation:fadeUp .25s ease both}
+@media(max-width:620px){.cards{grid-template-columns:repeat(2,1fr)}.bbg{display:none}td,thead th{padding:8px 6px;font-size:12px}}
+
+/* ── CALC SECTION ── */
+.calc-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:20px}
+.calc-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.calc-header h3{font-size:13px;font-weight:500;color:var(--text2)}
+.calc-body{padding:20px 18px}
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.calc-field label{display:block;font-size:11px;color:var(--text3);margin-bottom:6px;letter-spacing:.4px}
+.calc-field input,.calc-field select{width:100%;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border-color .15s}
+.calc-field input:focus,.calc-field select:focus{border-color:var(--accent)}
+.calc-field select option{background:var(--surface2)}
+.calc-full{grid-column:1/-1}
+.btn-calc{display:flex;align-items:center;gap:6px;background:var(--up);color:#0d0f14;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--sans);transition:background .15s}
+.btn-calc:hover{background:#28c96e}
+.calc-result{margin-top:20px;display:none}
+.result-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.rcard{background:var(--bg);border:1px solid var(--border2);border-radius:10px;padding:14px 16px}
+.rcard .rl{font-size:11px;color:var(--text3);margin-bottom:5px}
+.rcard .rv{font-size:18px;font-weight:600;font-family:var(--mono);color:var(--text)}
+.rcard .rv.up{color:var(--up)}.rcard .rv.dn{color:var(--dn)}.rcard .rv.gold{color:var(--gold)}
+.rcard .rs{font-size:11px;color:var(--text3);margin-top:3px;font-family:var(--mono)}
+.result-detail{background:var(--bg);border:1px solid var(--border2);border-radius:10px;overflow:hidden}
+.result-detail table{width:100%;border-collapse:collapse;font-size:12px}
+.result-detail th{padding:8px 12px;text-align:left;font-size:10px;color:var(--text3);border-bottom:1px solid var(--border);letter-spacing:.5px;text-transform:uppercase}
+.result-detail th:last-child{text-align:right}
+.result-detail td{padding:9px 12px;border-bottom:1px solid var(--border);color:var(--text)}
+.result-detail td:last-child{text-align:right;font-family:var(--mono);font-weight:500}
+.result-detail tr:last-child td{border-bottom:none}
+.tag-up{color:var(--up)}.tag-dn{color:var(--dn)}
+.calc-note{font-size:11px;color:var(--text3);margin-top:12px;line-height:1.7;padding:10px 12px;background:rgba(79,142,247,.04);border-radius:6px;border:1px solid rgba(79,142,247,.12)}
+@media(max-width:600px){.calc-grid{grid-template-columns:1fr}.result-cards{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div>
+      <div class="htitle">กองทุน<span>กบข.</span> — NAV รายวัน</div>
+      <div class="hsub">Government Pension Fund · ข้อมูลจาก gpf.or.th · รีเฟรชอัตโนมัติทุก 10 นาที</div>
+    </div>
+    <div class="hright">
+      <div class="badge" id="dLabel">—</div>
+      <button class="btn btn-blue" id="btnR" onclick="loadAll()">
+        <svg id="ico" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13.5 2.5A6.5 6.5 0 1 1 8 1.5" stroke-linecap="round"/>
+          <polyline points="14,1 14,4 11,4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        รีเฟรช
+      </button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-nav" onclick="showSection('nav');setMode('ytd',this)">YTD ต้นปี</button>
+    <button class="tab" onclick="showSection('nav');setMode('today',this)">เมื่อวาน vs วันนี้</button>
+    <button class="tab" onclick="showSection('nav');setMode('12m',this)">12 เดือน</button>
+    <button class="tab" onclick="showSection('nav');setMode('1y',this)">1 ปี</button>
+    <button class="tab" onclick="showSection('nav');setMode('3y',this)">3 ปี</button>
+    <button class="tab" onclick="showSection('nav');setMode('5y',this)">5 ปี</button>
+    <button class="tab" onclick="showSection('nav');setMode('all',this)">ตั้งแต่ก่อตั้ง</button>
+    <button class="tab" id="tab-calc" onclick="showSection('calc',this)" style="margin-left:8px;border-color:var(--gold);color:var(--gold)">🧮 คำนวณยอดเงิน</button>
+  </div>
+
+
+  <!-- NAV SECTION -->
+  <div id="sec-nav">
+  <div class="cards" id="cards"></div>
+  <div class="twrap">
+    <div class="thead2">
+      <h3 id="tTitle">—</h3>
+      <div class="sbtns">
+        <button class="sbtn active" onclick="setSort('pct',this)">เรียง %</button>
+        <button class="sbtn" onclick="setSort('nav',this)">NAV สูงสุด</button>
+        <button class="sbtn" onclick="setSort('name',this)">ชื่อแผน</button>
+      </div>
+    </div>
+    <div id="tBody"></div>
+    <div class="tfooter" id="tFoot"></div>
+  </div>
+  </div>
+
+  <!-- CALC SECTION -->
+  <div id="sec-calc" style="display:none">
+  <div class="calc-wrap">
+    <div class="calc-header">
+      <h3>🧮 คำนวณมูลค่าเงินในกองทุน</h3>
+      <span style="font-size:11px;color:var(--text3);font-family:var(--mono)">ใช้ NAV ล่าสุดจาก กบข.</span>
+    </div>
+    <div class="calc-body">
+      <div class="calc-grid">
+        <div class="calc-field">
+          <label>แผนการลงทุน</label>
+          <select id="cPlan">
+            <option value="UNIT_COST1">แผนลงทุนพื้นฐานทั่วไป</option>
+            <option value="UNIT_COST2">แผนเชิงรุก 35</option>
+            <option value="UNIT_COST5">แผนเชิงรุก 20</option>
+            <option value="UNIT_COST6">แผนเชิงรุก 65</option>
+            <option value="UNIT_COST13">แผนเชิงรุก 75</option>
+            <option value="UNIT_COST3">แผนตราสารหนี้</option>
+            <option value="UNIT_COST4">แผนเงินฝากและตราสารหนี้ระยะสั้น</option>
+            <option value="UNIT_COST7">แผนหุ้นไทย</option>
+            <option value="UNIT_COST9">แผนหุ้นต่างประเทศ</option>
+            <option value="UNIT_COST8">แผนกองทุนอสังหาริมทรัพย์ไทย</option>
+            <option value="UNIT_COST11">แผนตราสารหนี้ต่างประเทศ</option>
+            <option value="UNIT_COST12">แผนทองคำ</option>
+            <option value="UNIT_COST14">แผนกองทุนรวมวายุภักษ์</option>
+            <option value="UNIT_COST15">แผนเกษียณสบายใจ 2569</option>
+            <option value="UNIT_COST16">แผนการลงทุนตามหลักชะรีอะฮ์</option>
+          </select>
+        </div>
+        <div class="calc-field">
+          <label>จำนวนหน่วย (Units) ที่ถืออยู่</label>
+          <input type="number" id="cUnits" placeholder="เช่น 5,234.56" min="0" step="0.0001">
+        </div>
+        <div class="calc-field">
+          <label>ต้นทุนเฉลี่ยต่อหน่วย (฿) — ถ้าทราบ</label>
+          <input type="number" id="cCost" placeholder="เช่น 28.5000" min="0" step="0.0001">
+        </div>
+        <div class="calc-field">
+          <label>หรือกรอกต้นทุนรวม (฿) — ถ้าทราบ</label>
+          <input type="number" id="cTotalCost" placeholder="เช่น 149,000" min="0">
+        </div>
+      </div>
+      <button class="btn-calc" onclick="calculate()">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="2" width="12" height="12" rx="2"/>
+          <path d="M5 8h6M8 5v6" stroke-linecap="round"/>
+        </svg>
+        คำนวณ
+      </button>
+
+      <div class="calc-result" id="calcResult">
+        <div class="result-cards" id="resultCards"></div>
+        <div class="result-detail" id="resultDetail"></div>
+        <div class="calc-note" id="calcNote"></div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+</div>
+
+<script>
+const PROXY = "https://script.google.com/macros/s/AKfycbwprnTJcUWcaAu0uR3JPHU7do4SCCREsQ2mkbFmhSFwC5-CiLNRSKTO_eKRfY0vv9aA/exec?pageName=";
+
+const PLANS = [
+  {k:"UNIT_COST12",l:"แผนทองคำ",c:"#f5c842"},
+  {k:"UNIT_COST13",l:"แผนเชิงรุก 75",c:"#f55353"},
+  {k:"UNIT_COST6", l:"แผนเชิงรุก 65",c:"#e879a0"},
+  {k:"UNIT_COST2", l:"แผนเชิงรุก 35",c:"#f5973a"},
+  {k:"UNIT_COST9", l:"แผนหุ้นต่างประเทศ",c:"#d4923a"},
+  {k:"UNIT_COST7", l:"แผนหุ้นไทย",c:"#34d87a"},
+  {k:"UNIT_COST5", l:"แผนเชิงรุก 20",c:"#ff7340"},
+  {k:"UNIT_COST8", l:"แผนกองทุนอสังหาริมทรัพย์ไทย",c:"#5b8df5"},
+  {k:"UNIT_COST14",l:"แผนกองทุนรวมวายุภักษ์",c:"#5fbb6e"},
+  {k:"UNIT_COST16",l:"แผนการลงทุนตามหลักชะรีอะฮ์",c:"#4ec9c9"},
+  {k:"UNIT_COST1", l:"แผนลงทุนพื้นฐานทั่วไป",c:"#4f8ef7"},
+  {k:"UNIT_COST15",l:"แผนเกษียณสบายใจ 2569",c:"#9b7be8"},
+  {k:"UNIT_COST11",l:"แผนตราสารหนี้ต่างประเทศ",c:"#c76fba"},
+  {k:"UNIT_COST3", l:"แผนตราสารหนี้",c:"#8b92a8"},
+  {k:"UNIT_COST4", l:"แผนเงินฝากและตราสารหนี้ระยะสั้น",c:"#6ab7d4"},
+];
+
+let S = {mode:"ytd",sort:"pct",nowRow:null,janRow:null,hist:[]};
+
+const parseD = s=>{const p=s.split(" ")[0].split("/");return new Date(+p[2],+p[1]-1,+p[0])};
+const fmtTH  = s=>{const p=s.split(" ")[0].split("/");return p[0]+"/"+p[1]+"/"+(+p[2]+543)};
+const first  = a=>a.slice().sort((x,y)=>parseD(x.LAUNCH_DATE)-parseD(y.LAUNCH_DATE))[0];
+const last   = a=>a.slice().sort((x,y)=>parseD(y.LAUNCH_DATE)-parseD(x.LAUNCH_DATE))[0];
+
+const PAGE_MAP = {
+  "ytd_jan": "NAVBottom_01_",   // ต่อด้วยปี
+  "12m":  "NAV_12",
+  "3y":   "NAV_3",
+  "5y":   "NAV_5",
+  "1y":   "NAVBottom_prevYear",
+  "all":  "NAV_ALL",
+};
+
+async function fetchGPF(pageName){
+  const r = await fetch(PROXY + pageName);
+  if(!r.ok) throw new Error("HTTP " + r.status);
+  const text = await r.text();
+  const clean = text.replace(/^﻿/,"").trim();
+  try {
+    const p = JSON.parse(clean);
+    return Array.isArray(p) ? p : (p.data || p);
+  } catch(e) {
+    const m = clean.match(/(\[[\s\S]*\])/);
+    if(!m) throw new Error("ไม่พบข้อมูล JSON จาก GAS");
+    return JSON.parse(m[1]);
+  }
+}
+
+async function loadAll(){
+  if(S.mode==="calc") return;
+  const btn=document.getElementById("btnR");
+  const ico=document.getElementById("ico");
+  btn.classList.add("loading"); ico.classList.add("spinning");
+  document.getElementById("tBody").innerHTML="<div class=\"sbox\"><div class=\"sring\"></div>กำลังดึงข้อมูล...</div>";
+  document.getElementById("cards").innerHTML="";
+  try{
+    const now = new Date();
+    const yr  = now.getFullYear();
+    const mo  = now.getMonth(); // 0-based
+    const mm  = String(mo+1).padStart(2,"0");
+    const mode = S.mode;
+
+    // ── helper: NAVBottom ของเดือน/ปี ──
+    function navBottomKey(m0, y0){
+      // m0 = 0-based month, y0 = year (CE)
+      let m = m0, y = y0;
+      if(m < 0){ y--; m += 12; }
+      return "NAVBottom_"+String(m+1).padStart(2,"0")+"_"+y;
+    }
+
+    // ── ทุก mode ต้องการ NAV ล่าสุด (วันนี้) จาก NAVBottom เดือนปัจจุบัน ──
+    let recNow = await fetchGPF(navBottomKey(mo, yr));
+    if(!recNow || recNow.length===0){
+      // fallback เดือนก่อน
+      recNow = await fetchGPF(navBottomKey(mo-1, yr));
+    }
+    S.nowRow = last(recNow);
+
+    // ── หา NAV อ้างอิงตาม mode ──
+    let refRows = [];
+    let refDesc = "";
+
+    if(mode==="ytd"){
+      // YTD: ต้นปี = ม.ค. ปีนี้ → เอา row แรกของ ม.ค.
+      const janData = await fetchGPF("NAVBottom_01_"+yr);
+      refRows = janData;
+      S.janRow = first(janData);
+      refDesc = "ต้นปี "+yr;
+
+    } else if(mode==="today"){
+      // เมื่อวาน vs วันนี้ = ใช้ recNow เดือนปัจจุบัน เอา 2 วันล่าสุด
+      refRows = recNow;
+      S.janRow = null;
+      refDesc = "เมื่อวาน";
+
+    } else if(mode==="12m"){
+      // 12 เดือน = เดือนปัจจุบัน ปีที่แล้ว → เอา row ล่าสุดของเดือนนั้น
+      const refData = await fetchGPF(navBottomKey(mo, yr-1));
+      refRows = refData;
+      S.janRow = null;
+      refDesc = "12 เดือนก่อน ("+String(mo+1).padStart(2,"0")+"/"+( yr-1)+")";
+
+    } else if(mode==="1y"){
+      // 1 ปีที่ผ่านมา = 1 ม.ค. ปีที่แล้ว ถึง 31 ธ.ค. ปีที่แล้ว
+      // ref = ม.ค. ปีที่แล้ว (row แรก), now = ธ.ค. ปีที่แล้ว (row สุดท้าย)
+      const prevYr = yr - 1;
+      const janPrev = await fetchGPF("NAVBottom_01_"+prevYr);
+      const decPrev = await fetchGPF("NAVBottom_12_"+prevYr);
+      refRows = janPrev;
+      // override nowRow ด้วย ธ.ค. ปีที่แล้ว
+      if(decPrev && decPrev.length>0) S.nowRow = last(decPrev);
+      S.janRow = null;
+      refDesc = "ปี "+prevYr+" (ม.ค. → ธ.ค.)";
+
+    } else if(mode==="3y"){
+      // 3 ปี = เดือนนี้ ย้อน 3 ปี
+      const refData = await fetchGPF(navBottomKey(mo, yr-3));
+      refRows = refData || [];
+      // fallback เดือนถัดไปถ้าไม่มีข้อมูล
+      if(!refRows.length) refRows = await fetchGPF(navBottomKey(mo+1, yr-3));
+      S.janRow = null;
+      refDesc = "3 ปีก่อน ("+String(mo+1).padStart(2,"0")+"/"+(yr-3)+")";
+
+    } else if(mode==="5y"){
+      // 5 ปี = เดือนนี้ ย้อน 5 ปี
+      const refData = await fetchGPF(navBottomKey(mo, yr-5));
+      refRows = refData || [];
+      if(!refRows.length) refRows = await fetchGPF(navBottomKey(mo+1, yr-5));
+      S.janRow = null;
+      refDesc = "5 ปีก่อน ("+String(mo+1).padStart(2,"0")+"/"+(yr-5)+")";
+
+    } else {
+      // ตั้งแต่ก่อตั้ง = NAV_ALL หา row แรกสุดของแต่ละแผน
+      const allData = await fetchGPF("NAV_ALL");
+      // เพิ่ม dec2568 สำหรับแผนใหม่
+      try{
+        const dec2568 = await fetchGPF("NAVBottom_12_2568");
+        if(dec2568 && dec2568.length>0){
+          const existing = new Set(allData.map(r=>r.LAUNCH_DATE));
+          allData.push(...dec2568.filter(r=>!existing.has(r.LAUNCH_DATE)));
+        }
+      }catch(e2){}
+      refRows = allData;
+      S.janRow = null;
+      refDesc = "ตั้งแต่ก่อตั้ง";
+    }
+
+    S.hist = refRows;
+    S.refDesc = refDesc;
+
+    render();
+  }catch(e){
+    document.getElementById("tBody").innerHTML=
+      "<div class=\"ebox\">⚠️ <strong>"+e.message+"</strong><br><small>ตรวจสอบ Internet connection หรือ Google Apps Script</small></div>";
+    document.getElementById("dLabel").textContent="โหลดไม่สำเร็จ";
+  }finally{btn.classList.remove("loading");ico.classList.remove("spinning")}
+}
+
+function setMode(m,el){S.mode=m;document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));el.classList.add("active");loadAll()}
+function setSort(s,el){S.sort=s;document.querySelectorAll(".sbtn").forEach(b=>b.classList.remove("active"));el.classList.add("active");render()}
+
+function render(){
+  if(!S.nowRow)return;
+  const{mode,sort,nowRow,janRow,hist}=S;
+  document.getElementById("dLabel").innerHTML="NAV ล่าสุด: <strong>"+fmtTH(nowRow.LAUNCH_DATE)+"</strong>";
+  let rows=PLANS.map(p=>{
+    const cur=parseFloat(nowRow[p.k]||0);if(!cur)return null;
+    let ref=cur;
+    if(mode==="ytd" && janRow){
+      ref = parseFloat(janRow[p.k]||0) || cur;
+    } else if(mode==="today"){
+      // เมื่อวาน = row ที่ 2 จากล่าสุด
+      const s2 = hist.slice().sort((a,b)=>parseD(b.LAUNCH_DATE)-parseD(a.LAUNCH_DATE));
+      ref = parseFloat(s2[1]?.[p.k]||0) || cur;
+    } else if(mode==="1y"){
+      // 1 ปี: ref = row แรกของ ม.ค. ปีที่แล้ว
+      const sorted1y = hist.slice().sort((a,b)=>parseD(a.LAUNCH_DATE)-parseD(b.LAUNCH_DATE));
+      const fv1y = sorted1y.find(r=>parseFloat(r[p.k]||0)>0);
+      ref = fv1y ? parseFloat(fv1y[p.k]) : cur;
+    } else {
+      // 12m, 3y, 5y, all: หา row ล่าสุดใน hist (เดือนที่ครบกำหนด) ที่มีค่า
+      const sortedDesc = hist.slice().sort((a,b)=>parseD(b.LAUNCH_DATE)-parseD(a.LAUNCH_DATE));
+      const fvDesc = sortedDesc.find(r=>parseFloat(r[p.k]||0)>0);
+      ref = fvDesc ? parseFloat(fvDesc[p.k]) : cur;
+    }
+    const diff=cur-ref,pct=ref?(diff/ref)*100:0;
+    // ถ้า ref === cur และไม่ใช่ mode วันนี้/ytd = ไม่มีข้อมูลย้อนหลัง ข้ามแผนนี้
+    if(ref===cur && mode!=="ytd" && mode!=="today") return null;
+    return{...p,cur,ref,diff,pct};
+  }).filter(Boolean);
+  if(sort==="pct")rows.sort((a,b)=>b.pct-a.pct);
+  if(sort==="nav")rows.sort((a,b)=>b.cur-a.cur);
+  if(sort==="name")rows.sort((a,b)=>a.l.localeCompare(b.l,"th"));
+  const pos=rows.filter(r=>r.pct>0).length,neg=rows.filter(r=>r.pct<0).length;
+  const best=[...rows].sort((a,b)=>b.pct-a.pct)[0];
+  const worst=[...rows].sort((a,b)=>a.pct-b.pct)[0];
+  const mxA=Math.max(...rows.map(r=>Math.abs(r.pct)),.01);
+  const ml={ytd:"ต้นปี",today:"เมื่อวาน","12m":"12 เดือนก่อน","1y":"ทั้งปีที่แล้ว","3y":"3 ปีก่อน","5y":"5 ปีก่อน",all:"ตั้งแต่ก่อตั้ง"}[mode]||"อ้างอิง";
+  document.getElementById("cards").innerHTML=
+    "<div class=\"card fi\"><div class=\"clabel\">NAV แผนพื้นฐานทั่วไป</div><div class=\"cval\">"+parseFloat(nowRow.UNIT_COST1||0).toFixed(4)+"</div><div class=\"csub\">"+fmtTH(nowRow.LAUNCH_DATE)+"</div></div>"+
+    "<div class=\"card fi\"><div class=\"clabel\">แผนบวก vs "+ml+"</div><div class=\"cval up\">"+pos+" แผน</div></div>"+
+    "<div class=\"card fi\"><div class=\"clabel\">แผนลบ vs "+ml+"</div><div class=\"cval dn\">"+neg+" แผน</div></div>"+
+    "<div class=\"card fi\"><div class=\"clabel\">ผลดีสุด</div><div class=\"cval gold\">"+(best?.pct>=0?"+":"")+best?.pct.toFixed(2)+"%</div><div class=\"csub\">"+best?.l.replace("แผน","")+"</div></div>"+
+    "<div class=\"card fi\"><div class=\"clabel\">ผลน้อยสุด</div><div class=\"cval dn\">"+(worst?.pct>=0?"+":"")+worst?.pct.toFixed(2)+"%</div><div class=\"csub\">"+worst?.l.replace("แผน","")+"</div></div>"+
+    "<div class=\"card fi\"><div class=\"clabel\">สินทรัพย์สุทธิ (ล้านล้าน ฿)</div><div class=\"cval\" style=\"font-size:16px\">"+((parseFloat(nowRow.NET_COST||0)/1e12).toFixed(3))+"</div></div>";
+  const rd = S.refDesc || "—";
+  // ใช้ refDesc ที่ loadAll กำหนดไว้ แสดงวันที่ NAV ปัจจุบัน
+  const _nowDate = fmtTH(nowRow.LAUNCH_DATE);
+  const _refD = S.refDesc || "อ้างอิง";
+  const titleMap={
+    ytd:   "YTD — ต้นปี ("+_refD+") → ปัจจุบัน ("+_nowDate+")",
+    today: "เมื่อวาน → วันนี้ ("+_nowDate+")",
+    "12m": "ย้อนหลัง 12 เดือน ("+_refD+" → "+_nowDate+")",
+    "1y":  "ผลตอบแทนปีที่แล้ว ("+_refD+")",
+    "3y":  "ย้อนหลัง 3 ปี ("+_refD+" → "+_nowDate+")",
+    "5y":  "ย้อนหลัง 5 ปี ("+_refD+" → "+_nowDate+")",
+    all:   "ตั้งแต่ก่อตั้งกองทุน → ปัจจุบัน ("+_nowDate+")"
+  };
+  document.getElementById("tTitle").textContent=titleMap[mode]||"";
+  let html="<table><thead><tr><th>แผนการลงทุน</th><th class=\"tc\">#</th><th>NAV อ้างอิง</th><th>NAV ปัจจุบัน</th><th>เปลี่ยนแปลง (฿)</th><th style=\"padding-right:16px\">เปลี่ยนแปลง (%)</th></tr></thead><tbody>";
+  rows.forEach((r,i)=>{
+    const up=r.pct>=0,bw=Math.min(Math.round(Math.abs(r.pct)/mxA*100),100);
+    html+="<tr class=\"fi\" style=\"animation-delay:"+(i*.016)+"s\"><td><div class=\"pname\"><span class=\"pdot\" style=\"background:"+r.c+"\"></span><span>"+r.l+"</span></div></td><td class=\"tc\"><span class=\"rnum\">"+(i+1)+"</span></td><td><span class=\"nnum nref\">"+r.ref.toFixed(4)+"</span></td><td><span class=\"nnum ncur\">"+r.cur.toFixed(4)+"</span></td><td><span class=\"cv "+(up?"up":"dn")+"\">"+(up?"+":"")+r.diff.toFixed(4)+"</span></td><td><div class=\"chg\" style=\"padding-right:4px\"><span class=\"cv "+(up?"up":"dn")+"\">"+(up?"+":"")+r.pct.toFixed(2)+"%</span><div class=\"bbg\"><div class=\"bin "+(up?"up":"dn")+"\" style=\"width:"+bw+"%\"></div></div></div></td></tr>";
+  });
+  document.getElementById("tBody").innerHTML=html+"</tbody></table>";
+  const _hiddenP = PLANS.filter(p=>{
+    const _cur=parseFloat(S.nowRow?.[p.k]||0);
+    if(!_cur || S.mode==="ytd" || S.mode==="today" || S.mode==="1y") return false;
+    const _sv=S.hist.slice().sort((a,b)=>parseD(a.LAUNCH_DATE)-parseD(b.LAUNCH_DATE));
+    const _fv=_sv.find(r=>parseFloat(r[p.k]||0)>0);
+    return !_fv || parseFloat(_fv[p.k])===_cur;
+  });
+  const _note = _hiddenP.length>0 ? " · ไม่แสดง "+_hiddenP.length+" แผนที่ข้อมูลไม่เพียงพอ ("+_hiddenP.map(p=>p.l).join(", ")+")" : "";
+  document.getElementById("tFoot").innerHTML="<span>ข้อมูล: gpf.or.th"+_note+"</span><span>อัปเดต: "+new Date().toLocaleTimeString("th-TH")+"</span>";
+}
+
+
+function showSection(sec, el) {
+  document.getElementById("sec-nav").style.display = sec==="nav" ? "block" : "none";
+  document.getElementById("sec-calc").style.display = sec==="calc" ? "block" : "none";
+  if(sec==="calc") {
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    document.getElementById("tab-calc").classList.add("active");
+    // populate select with latest NAV
+    if(S.nowRow) populateCalcNav();
+  }
+}
+
+function populateCalcNav() {
+  // อัปเดต placeholder ให้เห็น NAV ปัจจุบัน
+  const sel = document.getElementById("cPlan");
+  const opt = sel.options[sel.selectedIndex];
+  const key = sel.value;
+  const nav = S.nowRow ? parseFloat(S.nowRow[key]||0) : 0;
+  document.getElementById("cCost").placeholder = "เช่น " + nav.toFixed(4);
+}
+
+function calculate() {
+  const planKey  = document.getElementById("cPlan").value;
+  const units    = parseFloat(document.getElementById("cUnits").value) || 0;
+  const costPer  = parseFloat(document.getElementById("cCost").value) || 0;
+  const costTotal= parseFloat(document.getElementById("cTotalCost").value) || 0;
+
+  if (!S.nowRow) { alert("ยังไม่มีข้อมูล NAV — กรุณาโหลดข้อมูลก่อน"); return; }
+  if (units <= 0) { alert("กรุณากรอกจำนวนหน่วย"); return; }
+
+  const navNow   = parseFloat(S.nowRow[planKey] || 0);
+  const planName = document.getElementById("cPlan").options[document.getElementById("cPlan").selectedIndex].text;
+  const navDate  = fmtTH(S.nowRow.LAUNCH_DATE);
+
+  // คำนวณมูลค่าปัจจุบัน
+  const valueNow = units * navNow;
+
+  // ต้นทุน
+  let totalCost = 0;
+  if (costTotal > 0)      totalCost = costTotal;
+  else if (costPer > 0)   totalCost = units * costPer;
+
+  const profit   = totalCost > 0 ? valueNow - totalCost : null;
+  const profitPct= totalCost > 0 ? (profit / totalCost) * 100 : null;
+
+  // YTD: เทียบกับต้นปี
+  const navJan   = S.janRow ? parseFloat(S.janRow[planKey] || 0) : 0;
+  const valueJan = navJan > 0 ? units * navJan : null;
+  const ytdGain  = valueJan ? valueNow - valueJan : null;
+  const ytdPct   = valueJan ? (ytdGain / valueJan) * 100 : null;
+  const janDate  = S.janRow ? fmtTH(S.janRow.LAUNCH_DATE) : null;
+
+  // แสดงผล
+  const res = document.getElementById("calcResult");
+  res.style.display = "block";
+
+  const fmt = n => n.toLocaleString("th-TH", {minimumFractionDigits:2, maximumFractionDigits:2});
+  const fmtU= n => n.toLocaleString("th-TH", {minimumFractionDigits:4, maximumFractionDigits:4});
+
+  document.getElementById("resultCards").innerHTML = `
+    <div class="rcard">
+      <div class="rl">มูลค่าปัจจุบัน</div>
+      <div class="rv gold">${fmt(valueNow)} ฿</div>
+      <div class="rs">NAV ${navNow.toFixed(4)} · ${navDate}</div>
+    </div>
+    ${profit !== null ? `
+    <div class="rcard">
+      <div class="rl">กำไร/ขาดทุน (vs ต้นทุน)</div>
+      <div class="rv ${profit>=0?'up':'dn'}">${profit>=0?'+':''}${fmt(profit)} ฿</div>
+      <div class="rs">${profitPct>=0?'+':''}${profitPct.toFixed(2)}% จากต้นทุน ${fmt(totalCost)} ฿</div>
+    </div>` : ''}
+    ${ytdGain !== null ? `
+    <div class="rcard">
+      <div class="rl">กำไร YTD (vs ต้นปี ${(new Date().getFullYear()+543)})</div>
+      <div class="rv ${ytdGain>=0?'up':'dn'}">${ytdGain>=0?'+':''}${fmt(ytdGain)} ฿</div>
+      <div class="rs">${ytdPct>=0?'+':''}${ytdPct.toFixed(2)}% · ต้นปี ${fmt(valueJan)} ฿</div>
+    </div>` : ''}
+    <div class="rcard">
+      <div class="rl">จำนวนหน่วย</div>
+      <div class="rv">${fmtU(units)}</div>
+      <div class="rs">หน่วย</div>
+    </div>
+  `;
+
+  document.getElementById("resultDetail").innerHTML = `
+    <table>
+      <thead><tr><th>รายการ</th><th>มูลค่า</th></tr></thead>
+      <tbody>
+        <tr><td>แผนการลงทุน</td><td>${planName}</td></tr>
+        <tr><td>จำนวนหน่วย</td><td>${fmtU(units)} หน่วย</td></tr>
+        <tr><td>NAV ปัจจุบัน (${navDate})</td><td>${navNow.toFixed(4)} ฿/หน่วย</td></tr>
+        <tr><td><strong>มูลค่ารวมปัจจุบัน</strong></td><td><strong class="tag-up">${fmt(valueNow)} ฿</strong></td></tr>
+        ${totalCost > 0 ? `
+        <tr><td>ต้นทุนรวม</td><td>${fmt(totalCost)} ฿</td></tr>
+        <tr><td>ต้นทุนเฉลี่ยต่อหน่วย</td><td>${(totalCost/units).toFixed(4)} ฿/หน่วย</td></tr>
+        <tr><td>กำไร/ขาดทุน</td><td class="${profit>=0?'tag-up':'tag-dn'}">${profit>=0?'+':''}${fmt(profit)} ฿ (${profitPct>=0?'+':''}${profitPct.toFixed(2)}%)</td></tr>
+        ` : ''}
+        ${valueJan ? `
+        <tr><td>มูลค่า ณ ต้นปี (${janDate})</td><td>${fmt(valueJan)} ฿</td></tr>
+        <tr><td>NAV ต้นปี</td><td>${navJan.toFixed(4)} ฿/หน่วย</td></tr>
+        <tr><td>กำไร YTD</td><td class="${ytdGain>=0?'tag-up':'tag-dn'}">${ytdGain>=0?'+':''}${fmt(ytdGain)} ฿ (${ytdPct>=0?'+':''}${ytdPct.toFixed(2)}%)</td></tr>
+        ` : ''}
+      </tbody>
+    </table>
+  `;
+
+  document.getElementById("calcNote").innerHTML =
+    `📌 <strong>วิธีหาจำนวนหน่วย:</strong> เข้า My GPF → บัญชีของฉัน → ดูยอดเงินตามแผนการลงทุน → ดูคอลัมน์ "จำนวนหน่วย"<br>
+     ⚠️ ค่าที่คำนวณเป็นประมาณการเท่านั้น ยอดจริงอาจต่างกันเล็กน้อยจากการปัดเศษและค่าธรรมเนียม`;
+
+  // scroll to result
+  res.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+// อัปเดต NAV placeholder เมื่อเลือกแผน
+document.addEventListener("DOMContentLoaded", ()=>{
+  const sel = document.getElementById("cPlan");
+  if(sel) sel.addEventListener("change", populateCalcNav);
+});
+
+window.onload=loadAll;
+setInterval(()=>{if(S.nowRow)loadAll()},600000);
+</script>
+</body>
+</html>
