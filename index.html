@@ -317,7 +317,17 @@ svg{display:block;width:100%;overflow:visible}
 <!-- ════ DRAWDOWN ════ -->
 <div id="sec-dd" style="display:none">
   <div class="tw" style="margin-bottom:10px">
-    <div class="th2"><h3>Max Drawdown & Recovery Time</h3><span style="font-size:10px;color:var(--tx3)">ยิ่งใกล้ 0% ยิ่งดี</span></div>
+    <div class="th2">
+      <h3>Max Drawdown & Recovery Time</h3>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10px;color:var(--tx3)">ช่วง:</span>
+        <div class="sbs">
+          <button class="sb on" onclick="loadDD('5y');this.parentNode.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));this.classList.add('on')">5 ปี</button>
+          <button class="sb" onclick="loadDD('all');this.parentNode.querySelectorAll('.sb').forEach(b=>b.classList.remove('on'));this.classList.add('on')">ทั้งหมด*</button>
+        </div>
+        <span style="font-size:10px;color:var(--tx3)">ยิ่งใกล้ 0% ยิ่งดี</span>
+      </div>
+    </div>
   </div>
   <div id="ddBody"><div class="sbox"><div class="sring"></div>กำลังโหลด...</div></div>
   <div class="tf" id="ddFoot" style="background:var(--s1);border:1px solid var(--b1);border-radius:0 0 9px 9px"></div>
@@ -542,39 +552,72 @@ async function fg(p){
 
 function nbk(m0,y0){let m=m0,y=y0;if(m<0){y--;m+=12;}if(m>11){y++;m-=12;}return"NAVBottom_"+String(m+1).padStart(2,"0")+"_"+y;}
 
-async function getAllData(){
-  if(S.allData)return S.allData;
-  let d;
-  try {
-    d = await fg("NAV_ALL");
-  } catch(e1) {
-    // fallback: ลอง NAV_5 แทน NAV_ALL
-    console.warn("NAV_ALL ล้มเหลว:", e1.message, "→ ลอง NAV_5");
-    try {
-      d = await fg("NAV_5");
-    } catch(e2) {
-      throw new Error("ดึงข้อมูลล้มเหลว: "+e1.message+". Fallback ก็ล้มเหลว: "+e2.message);
-    }
+// ── ดึง NAVBottom ทีละเดือนแบบ parallel ──
+function nbkList(monthsBack){
+  // คืน list ของ pageName ย้อนหลัง monthsBack เดือน
+  const now=new Date();
+  const list=[];
+  for(let i=0;i<monthsBack;i++){
+    let m=now.getMonth()-i, y=now.getFullYear();
+    while(m<0){m+=12;y--;}
+    list.push("NAVBottom_"+String(m+1).padStart(2,"0")+"_"+y);
   }
-  // เพิ่มข้อมูลแผนใหม่ปลายปี 2568
-  try{
-    const dec=await fg("NAVBottom_12_2568");
-    if(dec&&dec.length){
-      const ex=new Set(d.map(r=>r.LAUNCH_DATE));
-      d=[...d,...dec.filter(r=>!ex.has(r.LAUNCH_DATE))];
-    }
-  }catch(e){}
-  // เพิ่มเดือนปัจจุบัน
-  try{
-    const now=new Date(),mo=String(now.getMonth()+1).padStart(2,"0"),yr=now.getFullYear();
-    const cur=await fg("NAVBottom_"+mo+"_"+yr);
-    if(cur&&cur.length){
-      const ex=new Set(d.map(r=>r.LAUNCH_DATE));
-      d=[...d,...cur.filter(r=>!ex.has(r.LAUNCH_DATE))];
-    }
-  }catch(e){}
-  S.allData=d.sort((a,b)=>pd(a.LAUNCH_DATE)-pd(b.LAUNCH_DATE));
-  return S.allData;
+  return list;
+}
+
+async function fetchMonths(monthsBack, batchSize=6){
+  const pages = nbkList(monthsBack);
+  let all = [];
+  const total = Math.ceil(pages.length/batchSize);
+
+  for(let i=0;i<pages.length;i+=batchSize){
+    const batchNum = Math.floor(i/batchSize)+1;
+    // อัปเดต progress ใน loading indicator
+    const loadingEls = document.querySelectorAll(".sring");
+    loadingEls.forEach(el=>{
+      const parent=el.closest(".sbox");
+      if(parent) parent.querySelector("div:last-child") && (parent.innerHTML=
+        '<div class="sring"></div>ดึงข้อมูล batch '+batchNum+'/'+total+' ('+monthsBack+' เดือน)...');
+    });
+
+    const batch = pages.slice(i,i+batchSize);
+    const results = await Promise.allSettled(batch.map(p=>fg(p)));
+    results.forEach(r=>{
+      if(r.status==="fulfilled"&&r.value&&r.value.length) all=[...all,...r.value];
+    });
+  }
+  // deduplicate by LAUNCH_DATE
+  const seen=new Set();
+  all=all.filter(r=>{
+    if(seen.has(r.LAUNCH_DATE))return false;
+    seen.add(r.LAUNCH_DATE);return true;
+  });
+  return all.sort((a,b)=>pd(a.LAUNCH_DATE)-pd(b.LAUNCH_DATE));
+}
+
+async function getDataForPeriod(period){
+  const key="data_"+period;
+  if(S.cache[key]) return S.cache[key];
+
+  let months;
+  if(period==="12m")     months=13;
+  else if(period==="3y") months=37;
+  else if(period==="5y") months=61;
+  else                   months=61; // all → ใช้ 5y เป็น default
+
+  // แสดง progress
+  const bodies=["ddBody","srBody","rlBody","hmBody","periodBody","compChart","rankBody"];
+  bodies.forEach(id=>{const el=document.getElementById(id);if(el&&el.innerHTML.includes("sring")){el.innerHTML='<div class="sbox"><div class="sring"></div>กำลังดึงข้อมูล '+months+' เดือน...</div>';}});
+
+  const d = await fetchMonths(months);
+  S.cache[key]=d;
+  S.allData=d;
+  return d;
+}
+
+async function getAllData(){
+  if(S.allData) return S.allData;
+  return getDataForPeriod("5y");
 }
 
 // ══════════════ SECTION ══════════════
@@ -759,11 +802,21 @@ async function loadRank(){
 }
 
 // ══════════════ PERIODIC RANK ══════════════
-function setPeriodMode(m,el){S.periodMode=m;document.querySelectorAll("#sec-period .sb").forEach(b=>b.classList.remove("on"));el.classList.add("on");renderPeriod();}
+function setPeriodMode(m,el){
+  S.periodMode=m;
+  document.querySelectorAll("#sec-period .sb").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  // ถ้า mode เปลี่ยน ต้องโหลดข้อมูลใหม่
+  const p=m==="year"?"5y":"12m";
+  const cached=S.cache["data_"+p];
+  if(cached){S.allData=cached;renderPeriod();}
+  else loadPeriod();
+}
 
 async function loadPeriod(){
+  const p=S.periodMode==="year"?"5y":"12m";
   document.getElementById("periodBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลด...</div>';
-  try{await getAllData();renderPeriod();}
+  try{const d=await getDataForPeriod(p);S.allData=d;renderPeriod();}
   catch(e){document.getElementById("periodBody").innerHTML='<div class="eb">⚠️ '+e.message+'</div>';}
 }
 
@@ -842,8 +895,8 @@ function renderPeriod(){
 function setHmMode(m,el){S.hmMode=m;document.querySelectorAll("#sec-hm .sb").forEach(b=>b.classList.remove("on"));el.classList.add("on");if(!S.allData)loadHM();else renderHM();}
 
 async function loadHM(){
-  document.getElementById("hmBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลด...</div>';
-  try{await getAllData();renderHM();}
+  document.getElementById("hmBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลด Heatmap (5 ปีล่าสุด)...</div>';
+  try{const d=await getDataForPeriod("5y");S.allData=d;renderHM();}
   catch(e){console.error("loadHM:",e);document.getElementById("hmBody").innerHTML='<div class="eb">⚠️ '+e.message+'</div>';}
 }
 
@@ -905,10 +958,15 @@ function renderHM(){
 }
 
 // ══════════════ DRAWDOWN ══════════════
-async function loadDD(){
-  document.getElementById("ddBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังคำนวณ Max Drawdown...</div>';
-  try{await getAllData();renderDD();}
-  catch(e){console.error("loadDD:",e);document.getElementById("ddBody").innerHTML='<div class="eb">⚠️ '+e.message+'</div>';}
+async function loadDD(period){
+  period = period||S.ddPeriod||"5y";
+  S.ddPeriod = period;
+  document.getElementById("ddBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังคำนวณ Max Drawdown ('+(period==="5y"?"5 ปีล่าสุด":"ตั้งแต่ก่อตั้ง")+')...</div>';
+  try{
+    const d=await getDataForPeriod(period);
+    S.allData=d;
+    renderDD();
+  }catch(e){console.error("loadDD:",e);document.getElementById("ddBody").innerHTML='<div class="eb">⚠️ '+e.message+'</div>';}
 }
 
 function calcDD(arr){
@@ -942,7 +1000,15 @@ function renderDD(){
 }
 
 // ══════════════ SHARPE ══════════════
-function setSrP(p,el){S.srP=p;document.querySelectorAll("#sec-sr .sb").forEach(b=>b.classList.remove("on"));el.classList.add("on");if(!S.allData)loadSR();else renderSR();}
+function setSrP(p,el){
+  S.srP=p;
+  document.querySelectorAll("#sec-sr .sb").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  const period=p==="3y"?"3y":p==="5y"?"5y":"5y";
+  const cached=S.cache["data_"+period];
+  if(cached){S.allData=cached;renderSR();}
+  else loadSR();
+}
 
 async function loadSR(){
   document.getElementById("srBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังคำนวณ Sharpe Ratio...</div>';
@@ -994,12 +1060,22 @@ function renderSR(){
 }
 
 // ══════════════ ROLLING RETURN ══════════════
-function setRlW(w,el){S.rlW=w;document.querySelectorAll("#sec-rolling .sb").forEach(b=>b.classList.remove("on"));el.classList.add("on");renderRolling();}
+function setRlW(w,el){
+  S.rlW=w;
+  document.querySelectorAll("#sec-rolling .sb").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  const period=w==="5y"?"5y":w==="3y"?"5y":"3y";
+  const cached=S.cache["data_"+period];
+  if(cached){S.allData=cached;renderRolling();}
+  else loadRolling();
+}
 
 async function loadRolling(){
-  document.getElementById("rlBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลด...</div>';
+  document.getElementById("rlBody").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลดข้อมูล Rolling Return...</div>';
   try{
-    await getAllData();
+    const rlW=S.rlW||"1y";
+    const p=rlW==="5y"?"5y":rlW==="3y"?"5y":"3y";
+    const d=await getDataForPeriod(p);S.allData=d;
     // populate plan select
     const sel=document.getElementById("rlPlan");
     sel.innerHTML=PLANS.map(p=>`<option value="${p.k}">${p.s}</option>`).join("");
@@ -1119,7 +1195,7 @@ async function runCrisis(){
   const res=document.getElementById("crisisResult");
   res.innerHTML='<div class="sbox"><div class="sring"></div>กำลังจำลอง...</div>';
   try{
-    const data=await getAllData();
+    const data=await getDataForPeriod("5y");S.allData=data;
     const crisis=CRISES.find(c=>c.id===S.crCrisis);
     const plan=PLANS.find(p=>p.k===S.crPlan);
     if(!crisis||!plan)return;
@@ -1295,7 +1371,12 @@ function setCompRange(r,el){
       b.classList.remove("on");
   });
   el.classList.add("on");
-  renderCompare();
+  // reload ถ้า range ต้องการข้อมูลมากกว่าที่มี
+  const rangeMap={"1m":"12m","3m":"12m","6m":"12m","1y":"12m","3y":"3y","5y":"5y","all":"5y"};
+  const p=rangeMap[r]||"5y";
+  const cached=S.cache["data_"+p];
+  if(cached){S.allData=cached;S.compDataLoaded=true;renderCompare();}
+  else loadCompare();
 }
 
 function setCompView(v,el){
@@ -1307,8 +1388,12 @@ function setCompView(v,el){
 
 async function loadCompare(){
   document.getElementById("compChart").innerHTML='<div class="sbox"><div class="sring"></div>กำลังโหลด...</div>';
-  try{ await getAllData(); S.compDataLoaded=true; renderCompare(); }
-  catch(e){ document.getElementById("compChart").innerHTML='<div class="eb">⚠️ '+e.message+'</div>'; }
+  const rangeMap={"1m":"12m","3m":"12m","6m":"12m","1y":"12m","3y":"3y","5y":"5y","all":"5y"};
+  const p=rangeMap[S.compRange]||"5y";
+  try{
+    const d=await getDataForPeriod(p);S.allData=d;
+    S.compDataLoaded=true; renderCompare();
+  }catch(e){ document.getElementById("compChart").innerHTML='<div class="eb">⚠️ '+e.message+'</div>'; }
 }
 
 function getCompStartDate(){
@@ -1446,7 +1531,17 @@ async function testGAS(){
   const btn=document.getElementById("btnTest");
   btn.textContent="กำลังทดสอบ...";btn.style.opacity=".6";
   const results=[];
-  const tests=["NAVBottom_01_2026","NAV_12","NAV_3","NAV_ALL"];
+  const now=new Date();
+  const mm=String(now.getMonth()+1).padStart(2,"0");
+  const mmPrev=String(now.getMonth()===0?12:now.getMonth()).padStart(2,"0");
+  const yr=now.getFullYear();
+  const yrPrev=now.getMonth()===0?yr-1:yr;
+  const tests=[
+    "NAVBottom_"+mm+"_"+yr,
+    "NAVBottom_"+mmPrev+"_"+yrPrev,
+    "NAVBottom_01_"+yr,
+    "NAVBottom_12_2568"
+  ];
   for(const t of tests){
     try{
       delete S.cache[t];
