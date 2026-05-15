@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GPF Tools — เครื่องมือวางแผน กบข.</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0f14;--s1:#141720;--s2:#1c2030;
+  --b1:#252a3a;--b2:#2e3548;
+  --tx:#e8ecf5;--tx2:#8b92a8;--tx3:#555e78;
+  --ac:#4f8ef7;--ac2:#3a6fd8;
+  --up:#34d87a;--dn:#f55353;--go:#f5c842;
+  --fn:"IBM Plex Sans Thai",sans-serif;--mo:"IBM Plex Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh}
+body::before{content:"";position:fixed;inset:0;z-index:0;
+  background-image:linear-gradient(var(--b1) 1px,transparent 1px),linear-gradient(90deg,var(--b1) 1px,transparent 1px);
+  background-size:40px 40px;opacity:.15;pointer-events:none}
+.pg{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:24px 16px 80px}
+
+/* HEADER */
+.hdr{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--b1)}
+.htl{font-size:20px;font-weight:600;margin-bottom:3px}.htl span{color:var(--ac)}
+.hsb{font-size:11px;color:var(--tx3);font-family:var(--mo)}
+.back-btn{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--tx2);background:var(--s2);border:1px solid var(--b2);border-radius:6px;padding:6px 12px;cursor:pointer;text-decoration:none;transition:all .15s}
+.back-btn:hover{color:var(--tx);border-color:var(--b1)}
+
+/* SECTION TABS */
+.stabs{display:flex;gap:3px;margin-bottom:24px;flex-wrap:wrap}
+.st{padding:7px 16px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;
+  border:1px solid var(--b2);background:transparent;color:var(--tx3);font-family:var(--fn);transition:all .15s}
+.st:hover{background:var(--s2);color:var(--tx2)}
+.st.on{background:var(--s2);border-color:var(--ac);color:var(--ac)}
+
+/* FORM */
+.section{background:var(--s1);border:1px solid var(--b1);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.sec-head{padding:14px 18px;border-bottom:1px solid var(--b1);display:flex;align-items:center;gap:10px}
+.sec-head h2{font-size:14px;font-weight:500;color:var(--tx)}
+.sec-icon{font-size:20px}
+.sec-body{padding:20px 18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+.form-grid.cols3{grid-template-columns:1fr 1fr 1fr}
+.field label{display:block;font-size:11px;color:var(--tx3);margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:7px;padding:9px 12px;color:var(--tx);font-family:var(--mo);font-size:13px;outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus{border-color:var(--ac)}
+.field select option{background:var(--s2)}
+.field .hint{font-size:10px;color:var(--tx3);margin-top:4px}
+.btn-run{display:inline-flex;align-items:center;gap:6px;background:var(--ac);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--fn);transition:background .15s}
+.btn-run:hover{background:var(--ac2)}
+.btn-run.go{background:var(--up);color:#0a1a0a}.btn-run.go:hover{background:#28c96e}
+
+/* RESULT CARDS */
+.res-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px;margin-top:18px}
+.rcard{background:var(--bg);border:1px solid var(--b2);border-radius:9px;padding:12px 14px}
+.rcard .rl{font-size:10px;color:var(--tx3);margin-bottom:4px}
+.rcard .rv{font-size:16px;font-weight:600;font-family:var(--mo)}
+.rcard .rs{font-size:10px;color:var(--tx3);margin-top:3px}
+.rv.up{color:var(--up)}.rv.dn{color:var(--dn)}.rv.go{color:var(--go)}.rv.ac{color:var(--ac)}
+
+/* PROGRESS BAR */
+.progress-wrap{margin-top:20px}
+.progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--tx3);margin-bottom:6px}
+.progress-track{height:10px;background:var(--b2);border-radius:5px;overflow:hidden}
+.progress-fill{height:10px;border-radius:5px;background:var(--ac);transition:width .8s ease}
+.progress-fill.warn{background:var(--go)}.progress-fill.ok{background:var(--up)}
+
+/* TIMELINE */
+.timeline{margin-top:18px}
+.tl-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--b1)}
+.tl-row:last-child{border-bottom:none}
+.tl-year{font-family:var(--mo);font-size:11px;color:var(--tx3);width:60px;flex-shrink:0}
+.tl-bar-wrap{flex:1;height:5px;background:var(--b2);border-radius:3px;overflow:hidden}
+.tl-bar{height:5px;border-radius:3px;background:var(--ac)}
+.tl-val{font-family:var(--mo);font-size:11px;color:var(--tx2);width:90px;text-align:right;flex-shrink:0}
+
+/* SWITCH RESULT */
+.switch-compare{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.sw-card{border-radius:10px;padding:16px 18px;border:1px solid var(--b2)}
+.sw-card.old{background:rgba(245,83,83,.05);border-color:rgba(245,83,83,.25)}
+.sw-card.new{background:rgba(52,216,122,.05);border-color:rgba(52,216,122,.25)}
+.sw-title{font-size:11px;color:var(--tx3);margin-bottom:8px}
+.sw-plan{font-size:14px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.sw-metrics{display:flex;flex-direction:column;gap:6px}
+.sw-metric{display:flex;justify-content:space-between;font-size:12px}
+.sw-label{color:var(--tx3)}
+.sw-val{font-family:var(--mo);font-weight:500}
+
+/* AI CHAT */
+.ai-setup{background:rgba(79,142,247,.06);border:1px solid rgba(79,142,247,.2);border-radius:9px;padding:14px 16px;margin-bottom:16px}
+.ai-setup label{display:block;font-size:11px;color:var(--tx3);margin-bottom:5px}
+.ai-setup input{width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:6px;padding:8px 11px;color:var(--tx);font-family:var(--mo);font-size:12px;outline:none}
+.ai-setup input:focus{border-color:var(--ac)}
+.ai-form-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
+.ai-result{background:var(--bg);border:1px solid var(--b2);border-radius:9px;padding:16px;margin-top:16px;display:none}
+.ai-result .ai-title{font-size:13px;font-weight:500;color:var(--ac);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.ai-result .ai-body{font-size:13px;color:var(--tx);line-height:1.8;white-space:pre-wrap}
+.ai-result.loading .ai-body::after{content:" ▌";animation:blink .7s infinite}
+@keyframes blink{50%{opacity:0}}
+.ai-disclaimer{font-size:10px;color:var(--tx3);margin-top:10px;padding:8px 10px;background:rgba(245,200,66,.04);border-radius:5px;border:1px solid rgba(245,200,66,.15)}
+
+/* MISC */
+.dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex-shrink:0}
+.sbox{padding:44px 20px;text-align:center;font-size:13px;color:var(--tx3)}
+.note-box{font-size:11px;color:var(--tx3);padding:10px 13px;background:rgba(79,142,247,.04);border-radius:6px;border:1px solid rgba(79,142,247,.1);margin-top:14px;line-height:1.7}
+.divider{height:1px;background:var(--b1);margin:16px 0}
+table{width:100%;border-collapse:collapse;margin-top:14px}
+thead th{padding:7px 10px;text-align:right;font-size:10px;color:var(--tx3);border-bottom:1px solid var(--b1);text-transform:uppercase;letter-spacing:.4px}
+thead th:first-child{text-align:left}
+tbody tr{border-bottom:1px solid var(--b1)}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--s2)}
+td{padding:8px 10px;text-align:right;font-size:12px}
+td:first-child{text-align:left}
+.mono{font-family:var(--mo)}.up{color:var(--up)}.dn{color:var(--dn)}.go{color:var(--go)}
+
+@media(max-width:600px){
+  .form-grid,.form-grid.cols3{grid-template-columns:1fr}
+  .switch-compare{grid-template-columns:1fr}
+  .ai-form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="pg">
+
+<!-- HEADER -->
+<div class="hdr">
+  <div>
+    <div class="htl">เครื่องมือ<span>กบข.</span> — วางแผน & วิเคราะห์</div>
+    <div class="hsb">เครื่องมือช่วยตัดสินใจลงทุน กองทุนบำเหน็จบำนาญข้าราชการ</div>
+  </div>
+  <a href="index.html" class="back-btn">← กลับ Dashboard</a>
+</div>
+
+<!-- TABS -->
+<div class="stabs">
+  <button class="st on" onclick="showSec('retire',this)">🎯 วางแผนเกษียณ</button>
+  <button class="st" onclick="showSec('switch',this)">🔄 จำลองสลับแผน</button>
+  <button class="st" onclick="showSec('ai',this)">🤖 AI แนะนำแผน</button>
+</div>
+
+<!-- ════ RETIRE ════ -->
+<div id="sec-retire">
+  <div class="section">
+    <div class="sec-head"><div class="sec-icon">🎯</div><h2>วางแผนเกษียณ — คำนวณเงินที่ต้องสะสมถึงเกษียณ</h2></div>
+    <div class="sec-body">
+      <div class="form-grid cols3">
+        <div class="field"><label>อายุปัจจุบัน (ปี)</label><input type="number" id="rAge" value="43" min="20" max="59"><div class="hint">สมาชิก กบข.</div></div>
+        <div class="field"><label>อายุเกษียณ (ปี)</label><input type="number" id="rRetireAge" value="60" min="40" max="70"></div>
+        <div class="field"><label>เงินในกองทุนปัจจุบัน (บาท)</label><input type="number" id="rCurrentAmt" value="599315" placeholder="เช่น 599,315"></div>
+        <div class="field"><label>เงินสะสมต่อเดือน (บาท)</label><input type="number" id="rMonthly" value="3500" placeholder="เช่น 3,500"><div class="hint">เงินสะสม + สมทบรวมกัน</div></div>
+        <div class="field"><label>ผลตอบแทนคาดหวัง (%/ปี)</label>
+          <select id="rReturn">
+            <option value="2">2% — แผนเงินฝาก/ตราสารหนี้สั้น</option>
+            <option value="3">3% — แผนตราสารหนี้</option>
+            <option value="3.5">3.5% — แผนลงทุนพื้นฐานทั่วไป</option>
+            <option value="4.5" selected>4.5% — แผนเชิงรุก 35</option>
+            <option value="5.5">5.5% — แผนเชิงรุก 65</option>
+            <option value="6.5">6.5% — แผนเชิงรุก 65 (Optimistic)</option>
+            <option value="8">8% — แผนหุ้นต่างประเทศ</option>
+            <option value="custom">กำหนดเอง</option>
+          </select>
+        </div>
+        <div class="field" id="rCustomField" style="display:none"><label>ผลตอบแทนกำหนดเอง (%/ปี)</label><input type="number" id="rCustomReturn" value="5" min="0" max="20" step="0.1"></div>
+        <div class="field"><label>เงินเดือนปัจจุบัน (บาท)</label><input type="number" id="rSalary" value="40000" placeholder="เพื่อคำนวณ replacement rate"></div>
+        <div class="field"><label>อายุขัยที่คาดการณ์ (ปี)</label><input type="number" id="rLifeExp" value="80" min="65" max="100"></div>
+        <div class="field"><label>อัตราเงินเฟ้อ (%/ปี)</label><input type="number" id="rInflation" value="2.5" min="0" max="10" step="0.1"></div>
+      </div>
+      <button class="btn-run" onclick="calcRetire()">คำนวณแผนเกษียณ</button>
+
+      <div id="retireResult" style="display:none">
+        <div class="res-cards" id="retireCards"></div>
+        <div class="progress-wrap" id="retireProgress"></div>
+        <div class="divider"></div>
+        <h3 style="font-size:13px;color:var(--tx2);margin-bottom:4px">การเติบโตของเงินทุนตามปี</h3>
+        <div class="timeline" id="retireTimeline"></div>
+        <div class="note-box" id="retireNote"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 scenarios -->
+  <div class="section">
+    <div class="sec-head"><div class="sec-icon">📊</div><h2>เปรียบเทียบ 3 สถานการณ์</h2></div>
+    <div class="sec-body">
+      <p style="font-size:12px;color:var(--tx3);margin-bottom:14px">ผลลัพธ์หากเลือกแผนการลงทุนต่างกัน (ข้อมูลอื่นเหมือนกับที่กรอกด้านบน)</p>
+      <div id="scenarioResult"><div class="sbox" style="padding:20px">กดคำนวณด้านบนก่อนครับ</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ SWITCH ════ -->
+<div id="sec-switch" style="display:none">
+  <div class="section">
+    <div class="sec-head"><div class="sec-icon">🔄</div><h2>จำลองการสลับแผน — ถ้าสลับวันนี้ผลลัพธ์จะเป็นอย่างไร</h2></div>
+    <div class="sec-body">
+      <div class="form-grid">
+        <div class="field"><label>แผนปัจจุบัน</label>
+          <select id="swFrom">
+            <option value="1">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
+            <option value="2">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
+            <option value="3">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
+            <option value="4" selected>แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
+            <option value="5">แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
+            <option value="6">แผนตราสารหนี้ (คาดหวัง 3%)</option>
+            <option value="7">แผนทองคำ (คาดหวัง 7%)</option>
+          </select>
+        </div>
+        <div class="field"><label>แผนที่ต้องการสลับไป</label>
+          <select id="swTo">
+            <option value="1">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
+            <option value="2">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
+            <option value="3">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
+            <option value="4">แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
+            <option value="5" selected>แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
+            <option value="6">แผนตราสารหนี้ (คาดหวัง 3%)</option>
+            <option value="7">แผนทองคำ (คาดหวัง 7%)</option>
+          </select>
+        </div>
+        <div class="field"><label>เงินในกองทุนตอนนี้ (บาท)</label><input type="number" id="swAmt" value="599315"></div>
+        <div class="field"><label>เงินสะสมต่อเดือน (บาท)</label><input type="number" id="swMonthly" value="3500"></div>
+        <div class="field"><label>อายุปัจจุบัน (ปี)</label><input type="number" id="swAge" value="43" min="20" max="59"></div>
+        <div class="field"><label>อายุเกษียณ (ปี)</label><input type="number" id="swRetireAge" value="60"></div>
+      </div>
+      <button class="btn-run" onclick="calcSwitch()">จำลองผลลัพธ์</button>
+
+      <div id="switchResult" style="display:none">
+        <div class="switch-compare" id="switchCards"></div>
+        <div class="section" style="margin-top:16px;margin-bottom:0">
+          <div class="sec-head" style="padding:10px 14px"><h2 style="font-size:12px">ตารางเปรียบเทียบรายปี</h2></div>
+          <div style="overflow-x:auto"><table>
+            <thead><tr>
+              <th>อายุ (ปี)</th>
+              <th>แผนเดิม</th>
+              <th>แผนใหม่</th>
+              <th>ส่วนต่าง</th>
+              <th>% ต่าง</th>
+            </tr></thead>
+            <tbody id="switchTable"></tbody>
+          </table></div>
+        </div>
+        <div class="note-box">⚠️ ผลตอบแทนที่ใช้เป็นค่าคาดการณ์เฉลี่ยเท่านั้น ในความเป็นจริงผลตอบแทนแต่ละปีผันผวน การสลับแผนมีค่าใช้จ่ายน้อยมากใน กบข. แต่ควรพิจารณา timing ตลาดด้วย</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ AI ════ -->
+<div id="sec-ai" style="display:none">
+  <div class="section">
+    <div class="sec-head"><div class="sec-icon">🤖</div><h2>AI แนะนำแผนการลงทุน — วิเคราะห์จากโปรไฟล์ของคุณ</h2></div>
+    <div class="sec-body">
+      <div class="ai-setup">
+        <label>🔑 Anthropic API Key (จาก console.anthropic.com)</label>
+        <input type="password" id="aiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+        <div style="font-size:10px;color:var(--tx3);margin-top:5px">Key จะใช้เฉพาะในเบราว์เซอร์นี้ ไม่ถูกส่งไปที่อื่น</div>
+      </div>
+
+      <h3 style="font-size:12px;color:var(--tx3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">ข้อมูลส่วนตัว</h3>
+      <div class="ai-form-grid">
+        <div class="field"><label>อายุ (ปี)</label><input type="number" id="aiAge" value="43" min="20" max="65"></div>
+        <div class="field"><label>อายุเกษียณที่ต้องการ</label><input type="number" id="aiRetireAge" value="60" min="40" max="70"></div>
+        <div class="field"><label>เงินในกองทุน กบข. ตอนนี้ (บาท)</label><input type="number" id="aiAmt" value="599315"></div>
+        <div class="field"><label>ระดับความเสี่ยงที่รับได้</label>
+          <select id="aiRisk">
+            <option value="ต่ำ">ต่ำ — รักษาเงินต้นเป็นหลัก</option>
+            <option value="ปานกลาง">ปานกลาง — รับผันผวนได้บ้าง</option>
+            <option value="สูง" selected>สูง — รับผันผวนระยะสั้นได้ดี</option>
+            <option value="สูงมาก">สูงมาก — เน้นผลตอบแทนสูงสุด</option>
+          </select>
+        </div>
+        <div class="field"><label>แผนปัจจุบัน</label>
+          <select id="aiCurrentPlan">
+            <option>แผนลงทุนพื้นฐานทั่วไป</option>
+            <option>แผนเชิงรุก 20</option>
+            <option>แผนเชิงรุก 35</option>
+            <option selected>แผนเชิงรุก 65</option>
+            <option>แผนเชิงรุก 75 (สมดุลตามอายุ)</option>
+            <option>แผนหุ้นต่างประเทศ</option>
+            <option>แผนหุ้นไทย</option>
+            <option>แผนตราสารหนี้</option>
+            <option>แผนทองคำ</option>
+          </select>
+        </div>
+        <div class="field"><label>ความเข้าใจการลงทุน</label>
+          <select id="aiKnowledge">
+            <option>มือใหม่ — เพิ่งเริ่มสนใจ</option>
+            <option selected>ปานกลาง — เข้าใจสินทรัพย์พื้นฐาน</option>
+            <option>สูง — ติดตามตลาดสม่ำเสมอ</option>
+          </select>
+        </div>
+      </div>
+
+      <h3 style="font-size:12px;color:var(--tx3);margin:14px 0 10px;text-transform:uppercase;letter-spacing:.4px">สถานการณ์ตลาดและเป้าหมาย</h3>
+      <div class="field" style="margin-bottom:12px"><label>มุมมองตลาดตอนนี้</label>
+        <select id="aiMarket">
+          <option>Bullish — มองว่าตลาดยังขาขึ้น</option>
+          <option selected>Neutral — ไม่แน่ใจ รอดูสถานการณ์</option>
+          <option>Bearish — กังวลตลาดจะปรับตัวลง</option>
+          <option>ไม่มีมุมมอง — ให้ AI ประเมินให้</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:14px"><label>เป้าหมายหลัก / ข้อมูลเพิ่มเติม (ถ้ามี)</label>
+        <textarea id="aiGoal" rows="2" style="width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:7px;padding:9px 12px;color:var(--tx);font-family:var(--fn);font-size:13px;outline:none;resize:vertical" placeholder="เช่น ต้องการเงิน 5 ล้านตอนเกษียณ, กังวลเรื่องเงินเฟ้อ, หรือสอบถามเรื่องเฉพาะ..."></textarea>
+      </div>
+
+      <button class="btn-run go" onclick="runAI()">🤖 ขอคำแนะนำจาก AI</button>
+
+      <div class="ai-result" id="aiResult">
+        <div class="ai-title">🤖 คำแนะนำจาก Claude</div>
+        <div class="ai-body" id="aiBody"></div>
+        <div class="ai-disclaimer">⚠️ คำแนะนำนี้เป็นเพียงข้อมูลประกอบการพิจารณา ไม่ใช่คำแนะนำการลงทุน ผลตอบแทนในอดีตไม่รับประกันอนาคต ควรศึกษาข้อมูลเพิ่มเติมและตัดสินใจด้วยตนเอง</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /pg -->
+
+<script>
+// ════════════ DATA ════════════
+const PLAN_DATA = {
+  1: {name:"แผนลงทุนพื้นฐานทั่วไป", ret:3.5, dd:-5.46, color:"#4f8ef7"},
+  2: {name:"แผนเชิงรุก 20",          ret:3.5, dd:-4.82, color:"#ff7340"},
+  3: {name:"แผนเชิงรุก 35",          ret:4.5, dd:-8.13, color:"#f5973a"},
+  4: {name:"แผนเชิงรุก 65",          ret:5.5, dd:-12.39,color:"#e879a0"},
+  5: {name:"แผนหุ้นต่างประเทศ",      ret:8.0, dd:-23.57,color:"#d4923a"},
+  6: {name:"แผนตราสารหนี้",          ret:3.0, dd:-2.43, color:"#8b92a8"},
+  7: {name:"แผนทองคำ",               ret:7.0, dd:-8.48, color:"#f5c842"},
+};
+const fB = n=>n.toLocaleString("th-TH",{minimumFractionDigits:0,maximumFractionDigits:0});
+const fM = n=>(n/1e6).toFixed(2)+"M";
+
+// ════════════ SECTION ════════════
+function showSec(sec,el){
+  ["retire","switch","ai"].forEach(s=>document.getElementById("sec-"+s).style.display=s===sec?"block":"none");
+  document.querySelectorAll(".st").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+}
+
+// ════════════ RETIREMENT PLANNER ════════════
+document.getElementById("rReturn").addEventListener("change", function(){
+  document.getElementById("rCustomField").style.display = this.value==="custom"?"block":"none";
+});
+
+function calcRetire(){
+  const age    = parseInt(document.getElementById("rAge").value)||43;
+  const retAge = parseInt(document.getElementById("rRetireAge").value)||60;
+  const current= parseFloat(document.getElementById("rCurrentAmt").value)||0;
+  const monthly= parseFloat(document.getElementById("rMonthly").value)||0;
+  const retSel = document.getElementById("rReturn").value;
+  const retRate= retSel==="custom" ? parseFloat(document.getElementById("rCustomReturn").value)||5 : parseFloat(retSel);
+  const salary = parseFloat(document.getElementById("rSalary").value)||0;
+  const lifeExp= parseInt(document.getElementById("rLifeExp").value)||80;
+  const inflation= parseFloat(document.getElementById("rInflation").value)||2.5;
+
+  const yearsLeft = retAge - age;
+  const yearsRetire = lifeExp - retAge;
+  const r = retRate/100/12;
+  const n = yearsLeft * 12;
+
+  // FV = current * (1+r)^n + monthly * [((1+r)^n - 1)/r]
+  const fvCurrent = current * Math.pow(1+r, n);
+  const fvMonthly = monthly * (Math.pow(1+r,n)-1)/r;
+  const totalFV   = fvCurrent + fvMonthly;
+
+  // เงินถอนรายเดือนหลังเกษียณ (สมมติถอนจนหมด)
+  const rR = (retRate-inflation)/100/12;
+  const withdrawMonthly = rR > 0
+    ? totalFV * rR / (1 - Math.pow(1+rR, -yearsRetire*12))
+    : totalFV / (yearsRetire*12);
+
+  const replaceRate = salary>0 ? (withdrawMonthly/salary)*100 : 0;
+  const targetAmt = salary * 0.7 * 12 * yearsRetire; // 70% replacement, not inflation-adjusted
+
+  // display
+  document.getElementById("retireResult").style.display="block";
+  document.getElementById("retireCards").innerHTML=
+    `<div class="rcard"><div class="rl">เงินสะสมเมื่อเกษียณ (อายุ ${retAge} ปี)</div><div class="rv go">${fB(totalFV)} ฿</div><div class="rs">${fM(totalFV)}</div></div>
+     <div class="rcard"><div class="rl">เวลาลงทุนที่เหลือ</div><div class="rv ac">${yearsLeft} ปี</div><div class="rs">${yearsLeft*12} เดือน</div></div>
+     <div class="rcard"><div class="rl">ถอนได้รายเดือนหลังเกษียณ</div><div class="rv up">${fB(withdrawMonthly)} ฿</div><div class="rs">จนถึงอายุ ${lifeExp} ปี</div></div>
+     <div class="rcard"><div class="rl">Replacement Rate</div><div class="rv ${replaceRate>=70?"up":replaceRate>=50?"go":"dn"}">${replaceRate.toFixed(1)}%</div><div class="rs">ของเงินเดือนปัจจุบัน</div></div>
+     <div class="rcard"><div class="rl">ผลตอบแทนที่ใช้คำนวณ</div><div class="rv">${retRate}%<span style="font-size:10px;color:var(--tx3)">/ปี</span></div></div>
+     <div class="rcard"><div class="rl">เงินจากการทบต้น (ดอกผล)</div><div class="rv up">${fB(totalFV-current-monthly*n)} ฿</div><div class="rs">${(((totalFV-current-monthly*n)/totalFV)*100).toFixed(1)}% ของยอดรวม</div></div>`;
+
+  // progress bar
+  const prog = Math.min((totalFV/Math.max(targetAmt,1))*100, 200);
+  const progColor = prog>=100?"ok":prog>=70?"warn":"";
+  document.getElementById("retireProgress").innerHTML=
+    `<div class="progress-label"><span>เป้าหมาย 70% Replacement Rate (${fM(targetAmt)})</span><span>${prog.toFixed(0)}%</span></div>
+     <div class="progress-track"><div class="progress-fill ${progColor}" style="width:${Math.min(prog,100)}%"></div></div>
+     <div style="font-size:10px;color:var(--tx3);margin-top:5px">${prog>=100?"✅ บรรลุเป้าหมาย — เงินเพียงพอ":prog>=70?"⚠️ ใกล้เคียงเป้าหมาย — ควรเพิ่มการออม":"❌ ต่ำกว่าเป้าหมาย — ควรปรับแผน"}</div>`;
+
+  // timeline: ทุก 5 ปี
+  let tlHtml="";
+  const maxFV = current * Math.pow(1+retRate/100, yearsLeft) + monthly*12 * yearsLeft;
+  for(let y=0; y<=yearsLeft; y+=y<5?1:5){
+    const nn=y*12;
+    const fv=current*Math.pow(1+r,nn)+monthly*(Math.pow(1+r,nn)-1)/r;
+    const barW=Math.min((fv/totalFV)*100,100);
+    tlHtml+=`<div class="tl-row">
+      <div class="tl-year">อายุ ${age+y}</div>
+      <div class="tl-bar-wrap"><div class="tl-bar" style="width:${barW}%"></div></div>
+      <div class="tl-val">${fM(fv)}</div>
+    </div>`;
+  }
+  document.getElementById("retireTimeline").innerHTML=tlHtml;
+  document.getElementById("retireNote").innerHTML=
+    `💡 <strong>ข้อสังเกต:</strong> ผลตอบแทน ${retRate}%/ปี เป็นค่าเฉลี่ยระยะยาว ในความเป็นจริงแต่ละปีผันผวน · 
+     เงินสะสม + สมทบรวม ${fB(monthly*12)} บาท/ปี · 
+     ดอกผลทบต้น ${fB(totalFV-current-monthly*n)} บาท (${(((totalFV-current-monthly*n)/totalFV)*100).toFixed(1)}% ของเงินทั้งหมด)`;
+
+  // 3 scenarios
+  const scenarios = [
+    {label:"Conservative", ret:3.0, color:"var(--tx2)"},
+    {label:"Base Case",    ret:retRate, color:"var(--ac)"},
+    {label:"Optimistic",   ret:Math.min(retRate+2,12), color:"var(--up)"},
+  ];
+  let scHtml=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">`;
+  scenarios.forEach(sc=>{
+    const rr=sc.ret/100/12;
+    const fvC=current*Math.pow(1+rr,n);
+    const fvM=monthly*(Math.pow(1+rr,n)-1)/rr;
+    const tot=fvC+fvM;
+    scHtml+=`<div style="background:var(--bg);border:1px solid var(--b2);border-radius:9px;padding:14px 16px">
+      <div style="font-size:10px;color:var(--tx3);margin-bottom:6px">${sc.label}</div>
+      <div style="font-size:11px;color:var(--tx3);margin-bottom:8px">${sc.ret}%/ปี</div>
+      <div style="font-size:18px;font-weight:600;font-family:var(--mo);color:${sc.color}">${fM(tot)}</div>
+      <div style="font-size:10px;color:var(--tx3);margin-top:3px">${fB(tot)} บาท</div>
+    </div>`;
+  });
+  scHtml+=`</div>`;
+  document.getElementById("scenarioResult").innerHTML=scHtml;
+}
+
+// ════════════ SWITCH SIMULATOR ════════════
+function calcSwitch(){
+  const fromId  = parseInt(document.getElementById("swFrom").value);
+  const toId    = parseInt(document.getElementById("swTo").value);
+  const amt     = parseFloat(document.getElementById("swAmt").value)||0;
+  const monthly = parseFloat(document.getElementById("swMonthly").value)||0;
+  const age     = parseInt(document.getElementById("swAge").value)||43;
+  const retAge  = parseInt(document.getElementById("swRetireAge").value)||60;
+  const yearsLeft = retAge - age;
+  const fromPlan = PLAN_DATA[fromId], toPlan = PLAN_DATA[toId];
+  if(!fromPlan||!toPlan) return;
+
+  function calcFV(ret, yrs){
+    const r=ret/100/12, n=yrs*12;
+    return amt*Math.pow(1+r,n)+monthly*(Math.pow(1+r,n)-1)/r;
+  }
+
+  const fvFrom = calcFV(fromPlan.ret, yearsLeft);
+  const fvTo   = calcFV(toPlan.ret, yearsLeft);
+  const diff   = fvTo - fvFrom;
+  const diffPct= (diff/fvFrom)*100;
+
+  document.getElementById("switchResult").style.display="block";
+  document.getElementById("switchCards").innerHTML=
+    `<div class="sw-card old">
+      <div class="sw-title">แผนปัจจุบัน (ก่อนสลับ)</div>
+      <div class="sw-plan"><span class="dot" style="background:${fromPlan.color}"></span>${fromPlan.name}</div>
+      <div class="sw-metrics">
+        <div class="sw-metric"><span class="sw-label">ผลตอบแทนคาดหวัง</span><span class="sw-val">${fromPlan.ret}%/ปี</span></div>
+        <div class="sw-metric"><span class="sw-label">Max Drawdown</span><span class="sw-val" style="color:var(--dn)">${fromPlan.dd}%</span></div>
+        <div class="sw-metric"><span class="sw-label">เงินเมื่อเกษียณ</span><span class="sw-val">${fM(fvFrom)}</span></div>
+        <div class="sw-metric"><span class="sw-label">ยอดเต็ม</span><span class="sw-val" style="font-size:11px">${fB(fvFrom)} ฿</span></div>
+      </div>
+    </div>
+    <div class="sw-card new">
+      <div class="sw-title">แผนใหม่ (หลังสลับ)</div>
+      <div class="sw-plan"><span class="dot" style="background:${toPlan.color}"></span>${toPlan.name}</div>
+      <div class="sw-metrics">
+        <div class="sw-metric"><span class="sw-label">ผลตอบแทนคาดหวัง</span><span class="sw-val">${toPlan.ret}%/ปี</span></div>
+        <div class="sw-metric"><span class="sw-label">Max Drawdown</span><span class="sw-val" style="color:var(--dn)">${toPlan.dd}%</span></div>
+        <div class="sw-metric"><span class="sw-label">เงินเมื่อเกษียณ</span><span class="sw-val" style="color:${diff>=0?"var(--up)":"var(--dn)"}">${fM(fvTo)}</span></div>
+        <div class="sw-metric"><span class="sw-label">ส่วนต่างจากแผนเดิม</span><span class="sw-val" style="color:${diff>=0?"var(--up)":"var(--dn)"};font-size:13px;font-weight:600">${diff>=0?"+":""}${fM(diff)} (${diffPct>=0?"+":""}${diffPct.toFixed(1)}%)</span></div>
+      </div>
+    </div>`;
+
+  // yearly table
+  let rows="";
+  for(let y=1; y<=yearsLeft; y+=y<5?1:5){
+    const vF=calcFV(fromPlan.ret,y), vT=calcFV(toPlan.ret,y), d=vT-vF;
+    const up=d>=0;
+    rows+=`<tr>
+      <td>${age+y}</td>
+      <td class="mono">${fM(vF)}</td>
+      <td class="mono" style="color:${up?"var(--up)":"var(--dn)"}">${fM(vT)}</td>
+      <td class="mono ${up?"up":"dn"}">${up?"+":""}${fM(d)}</td>
+      <td class="mono ${up?"up":"dn"}">${up?"+":""}${((d/vF)*100).toFixed(1)}%</td>
+    </tr>`;
+  }
+  document.getElementById("switchTable").innerHTML=rows;
+}
+
+// ════════════ AI ADVISOR ════════════
+async function runAI(){
+  const key  = document.getElementById("aiKey").value.trim();
+  const age  = document.getElementById("aiAge").value;
+  const retAge = document.getElementById("aiRetireAge").value;
+  const amt  = document.getElementById("aiAmt").value;
+  const risk = document.getElementById("aiRisk").value;
+  const plan = document.getElementById("aiCurrentPlan").value;
+  const know = document.getElementById("aiKnowledge").value;
+  const mkt  = document.getElementById("aiMarket").value;
+  const goal = document.getElementById("aiGoal").value;
+
+  if(!key){alert("กรุณากรอก API Key ก่อนครับ");return;}
+
+  const resEl = document.getElementById("aiResult");
+  const bodyEl = document.getElementById("aiBody");
+  resEl.style.display="block";
+  resEl.classList.add("loading");
+  bodyEl.textContent="กำลังวิเคราะห์";
+
+  const prompt = `คุณเป็นที่ปรึกษาการลงทุนสำหรับสมาชิก กบข. (กองทุนบำเหน็จบำนาญข้าราชการ) ไทย
+
+ข้อมูลสมาชิก:
+- อายุ: ${age} ปี
+- อายุเกษียณที่ต้องการ: ${retAge} ปี (เหลือเวลาลงทุน ${parseInt(retAge)-parseInt(age)} ปี)
+- เงินในกองทุนปัจจุบัน: ${parseInt(amt).toLocaleString("th-TH")} บาท
+- แผนการลงทุนปัจจุบัน: ${plan}
+- ระดับความเสี่ยงที่รับได้: ${risk}
+- ความเข้าใจการลงทุน: ${know}
+- มุมมองตลาดปัจจุบัน: ${mkt}
+${goal ? "- เป้าหมาย/ข้อมูลเพิ่มเติม: "+goal : ""}
+
+แผนการลงทุน กบข. ที่มีอยู่:
+• แผนเงินฝากและตราสารหนี้ระยะสั้น — ความเสี่ยงต่ำมาก, คาดหวัง ~2%/ปี
+• แผนตราสารหนี้ — ความเสี่ยงต่ำ, คาดหวัง ~3%/ปี
+• แผนลงทุนพื้นฐานทั่วไป — ความเสี่ยงปานกลาง-สูง, คาดหวัง ~3.5%/ปี
+• แผนเชิงรุก 20 — ความเสี่ยงปานกลาง, คาดหวัง ~3.5%/ปี, หุ้น 20%
+• แผนเชิงรุก 35 — ความเสี่ยงปานกลาง-สูง, คาดหวัง ~4.5%/ปี, หุ้น 35%
+• แผนเชิงรุก 65 — ความเสี่ยงสูง, คาดหวัง ~5.5%/ปี, หุ้น 65%
+• แผนหุ้นต่างประเทศ — ความเสี่ยงสูงมาก, คาดหวัง ~8%/ปี, หุ้น 100%
+• แผนหุ้นไทย — ความเสี่ยงสูงมาก, Max DD -37.58%, ผลตอบแทนระยะยาวต่ำ
+• แผนทองคำ — ความเสี่ยงสูง, ผลตอบแทน 3 ปี +27.36%, ลงทุนได้ไม่เกิน 25%
+• แผนสมดุลตามอายุ (ใหม่) — ปรับสัดส่วนอัตโนมัติตามอายุ, ไม่ยืดหยุ่น
+
+กรุณาวิเคราะห์และให้คำแนะนำเป็นภาษาไทย โดยครอบคลุม:
+1. ประเมินว่าแผนปัจจุบันเหมาะสมหรือไม่ เพราะอะไร
+2. แนะนำแผนที่เหมาะสมที่สุด (อาจผสมหลายแผน) พร้อมสัดส่วน
+3. เหตุผลที่เลือกแผนนั้น โยงกับโปรไฟล์และสถานการณ์ตลาด
+4. ข้อควรระวังและสิ่งที่ต้องติดตาม
+5. กลยุทธ์ปรับแผนในอนาคต (ควรปรับเมื่ออายุเท่าไร หรือเมื่อสถานการณ์ใด)
+
+ตอบให้กระชับ ได้ใจความ ใช้ภาษาราชการที่เข้าใจง่าย ไม่ต้องใส่คำเตือนซ้ำซ้อน`;
+
+  try{
+    const res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "Content-Type":"application/json",
+        "x-api-key":key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:"claude-sonnet-4-20250514",
+        max_tokens:1500,
+        messages:[{role:"user",content:prompt}]
+      })
+    });
+    if(!res.ok){
+      const err=await res.json().catch(()=>({}));
+      throw new Error(err?.error?.message||"HTTP "+res.status);
+    }
+    const data = await res.json();
+    const text = data.content?.find(b=>b.type==="text")?.text||"ไม่ได้รับคำตอบ";
+    resEl.classList.remove("loading");
+    bodyEl.textContent=text;
+  }catch(e){
+    resEl.classList.remove("loading");
+    bodyEl.textContent="❌ เกิดข้อผิดพลาด: "+e.message+"\n\nตรวจสอบ API Key และการเชื่อมต่ออินเทอร์เน็ต";
+  }
+}
+</script>
+</body>
+</html>
