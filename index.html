@@ -496,10 +496,10 @@ const PLANS=[
 ];
 
 const CRISES=[
-  {id:"covid",  icon:"🦠", title:"โควิด-19 (2563)",     desc:"ตลาดหุ้นร่วงเร็วที่สุดในประวัติศาสตร์ SET ร่วงจาก ~1,580 → ~1,025 จุด ใน 1 เดือน", start:"2020-01-31", end:"2020-03-31", severity:"รุนแรง"},
-  {id:"usrate", icon:"📈", title:"Fed ขึ้นดอกเบี้ย (2565)", desc:"Fed ขึ้นดอกเบี้ยเร็วที่สุดในรอบ 40 ปี จาก 0% → 4.25% ภายใน 9 เดือน กระทบตราสารหนี้และหุ้น", start:"2022-01-01", end:"2022-12-31", severity:"รุนแรง"},
-  {id:"thai18", icon:"📉", title:"วิกฤตหุ้นไทย (2561)",  desc:"SET ร่วงจาก ~1,850 → ~1,500 จุด จากความกังวลสงครามการค้า US-China", start:"2018-01-01", end:"2018-12-31", severity:"ปานกลาง"},
-  {id:"tom19",  icon:"🌊", title:"ปลายปี 2562 (ก่อนโควิด)", desc:"ตลาดโลกปรับตัวก่อนโควิด ทดสอบความแข็งแกร่งของแต่ละแผน", start:"2019-07-01", end:"2020-02-28", severity:"เล็กน้อย"},
+  {id:"usrate",  icon:"📈", title:"Fed ขึ้นดอกเบี้ย (2565)",    desc:"Fed ขึ้นดอกเบี้ยเร็วที่สุดในรอบ 40 ปี จาก 0% → 4.25% ภายใน 9 เดือน กระทบตราสารหนี้และหุ้นทั่วโลก", start:"2022-01-01", end:"2022-12-31", severity:"รุนแรง"},
+  {id:"thai25",  icon:"📉", title:"หุ้นไทยขาลง (2567-2568)",    desc:"SET ร่วงจาก ~1,450 → ~1,100 จุด ต่อเนื่องกว่า 1 ปี จากปัญหาเศรษฐกิจในประเทศและเงินทุนต่างชาติไหลออก", start:"2023-12-01", end:"2025-04-30", severity:"รุนแรง"},
+  {id:"gold26",  icon:"🥇", title:"ทองคำร่วง (มี.ค. 2569)",     desc:"ทองคำร่วงจากจุดสูงสุดในช่วง มี.ค.-เม.ย. 2569 หลังความกังวลเรื่องภูมิรัฐศาสตร์คลายตัว", start:"2026-02-28", end:"2026-04-30", severity:"ปานกลาง"},
+  {id:"covid",   icon:"🦠", title:"โควิด-19 (2563) *",          desc:"ตลาดหุ้นร่วงเร็วที่สุดในประวัติศาสตร์ SET ร่วงจาก ~1,580 → ~1,025 จุด ใน 1 เดือน (* ต้องโหลดข้อมูล 5+ ปี)", start:"2020-01-31", end:"2020-03-31", severity:"รุนแรง"},
 ];
 
 // ══════════════ STATE ══════════════
@@ -1167,8 +1167,9 @@ function initCrisis(){
   // crisis list
   let chtml="";
   CRISES.forEach(c=>{
+    const needsMore=c.id==="covid";
     chtml+=`<div class="crc${c.id===S.crCrisis?" sel":""}" onclick="selectCrisis('${c.id}',this)">
-      <div class="crc-title">${c.icon} ${c.title}</div>
+      <div class="crc-title">${c.icon} ${c.title}${needsMore?' <span style="font-size:10px;color:var(--go)">(โหลดนานขึ้น)</span>':'' }</div>
       <div class="crc-sub">${c.desc}</div>
       <div class="crc-period">ช่วง: ${c.start} → ${c.end} · ${c.severity}</div>
     </div>`;
@@ -1195,8 +1196,22 @@ async function runCrisis(){
   const res=document.getElementById("crisisResult");
   res.innerHTML='<div class="sbox"><div class="sring"></div>กำลังจำลอง...</div>';
   try{
-    const data=await getDataForPeriod("5y");S.allData=data;
     const crisis=CRISES.find(c=>c.id===S.crCrisis);
+    if(!crisis) return;
+
+    // คำนวณว่าต้องการข้อมูลกี่เดือน
+    const crisisStart=new Date(crisis.start);
+    const now=new Date();
+    const monthsNeeded=Math.ceil((now-crisisStart)/(1000*60*60*24*30))+6; // +6 เดือน buffer
+    const period=monthsNeeded>61?"all":monthsNeeded>37?"5y":monthsNeeded>13?"3y":"12m";
+
+    // ตรวจว่า cache มีข้อมูลครอบคลุมช่วง crisis หรือยัง
+    let data=S.allData;
+    if(!data||!data.length||pd(data[0].LAUNCH_DATE)>crisisStart){
+      res.innerHTML='<div class="sbox"><div class="sring"></div>กำลังดึงข้อมูลเพิ่ม ('+Math.round(monthsNeeded)+' เดือน)...</div>';
+      data=await fetchMonths(Math.min(monthsNeeded,73)); // max 73 เดือน (~6 ปี)
+      S.allData=data;
+    }
     const plan=PLANS.find(p=>p.k===S.crPlan);
     if(!crisis||!plan)return;
 
@@ -1213,7 +1228,10 @@ async function runCrisis(){
 
     // find pre-crisis NAV (last day before crisis start)
     const preRows=data.filter(r=>pd(r.LAUNCH_DATE)<sDate&&parseFloat(r[plan.k]||0)>0);
-    if(!preRows.length){res.innerHTML='<div class="eb">⚠️ ไม่พบข้อมูลก่อนวิกฤต</div>';return;}
+    if(!preRows.length){
+      res.innerHTML='<div class="eb">⚠️ ไม่พบข้อมูลก่อนวิกฤต '+crisis.title+'<br>ข้อมูลที่มีเริ่มจาก: '+(data.length?fTHs(data[0].LAUNCH_DATE):"—")+'<br>ลองเลือกเหตุการณ์วิกฤตในช่วง 5 ปีล่าสุดแทนครับ</div>';
+      return;
+    }
     const preRow=preRows[preRows.length-1];
     const preNAV=parseFloat(preRow[plan.k]);
     const preDate=preRow.LAUNCH_DATE;
