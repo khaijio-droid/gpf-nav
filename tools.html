@@ -154,12 +154,15 @@ td:first-child{text-align:left}
         <div class="field"><label>เงินสะสมต่อเดือน (บาท)</label><input type="number" id="rMonthly" value="3500" placeholder="เช่น 3,500"><div class="hint">เงินสะสม + สมทบรวมกัน</div></div>
         <div class="field"><label>ผลตอบแทนคาดหวัง (%/ปี)</label>
           <select id="rReturn">
-            <option value="2">2% — แผนเงินฝาก/ตราสารหนี้สั้น</option>
+            <option value="2">2% — แผนเงินฝาก/เกษียณ 2569</option>
+            <option value="2.5">2.5% — แผนตราสารหนี้ต่างประเทศ</option>
             <option value="3">3% — แผนตราสารหนี้</option>
-            <option value="3.5">3.5% — แผนลงทุนพื้นฐานทั่วไป</option>
+            <option value="3.5">3.5% — แผนพื้นฐานทั่วไป / อสังหาฯ</option>
+            <option value="4">4% — แผนวายุภักษ์ / สมดุลตามอายุ</option>
             <option value="4.5" selected>4.5% — แผนเชิงรุก 35</option>
+            <option value="5">5% — แผนชะรีอะฮ์</option>
             <option value="5.5">5.5% — แผนเชิงรุก 65</option>
-            <option value="6.5">6.5% — แผนเชิงรุก 65 (Optimistic)</option>
+            <option value="7">7% — แผนทองคำ</option>
             <option value="8">8% — แผนหุ้นต่างประเทศ</option>
             <option value="custom">กำหนดเอง</option>
           </select>
@@ -200,24 +203,40 @@ td:first-child{text-align:left}
       <div class="form-grid">
         <div class="field"><label>แผนปัจจุบัน</label>
           <select id="swFrom">
-            <option value="1">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
-            <option value="2">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
-            <option value="3">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
-            <option value="4" selected>แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
-            <option value="5">แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
-            <option value="6">แผนตราสารหนี้ (คาดหวัง 3%)</option>
-            <option value="7">แผนทองคำ (คาดหวัง 7%)</option>
+            <option value="1">แผนเงินฝากและตราสารหนี้ระยะสั้น (คาดหวัง 2%)</option>
+            <option value="2">แผนตราสารหนี้ (คาดหวัง 3%)</option>
+            <option value="3">แผนตราสารหนี้ต่างประเทศ (คาดหวัง 2.5%)</option>
+            <option value="4">แผนกองทุนรวมวายุภักษ์ (คาดหวัง 4%)</option>
+            <option value="5">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
+            <option value="6">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
+            <option value="7">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
+            <option value="8" selected>แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
+            <option value="9">แผนสมดุลตามอายุ (ใหม่) (คาดหวัง 4%)</option>
+            <option value="10">แผนหุ้นไทย (คาดหวัง 2% — Max DD -37.58%)</option>
+            <option value="11">แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
+            <option value="12">แผนกองทุนอสังหาริมทรัพย์ไทย (คาดหวัง 3.5%)</option>
+            <option value="13">แผนทองคำ (คาดหวัง 7%)</option>
+            <option value="14">แผนการลงทุนตามหลักชะรีอะฮ์ (คาดหวัง 5%)</option>
+            <option value="15">แผนเกษียณสบายใจ 2569 (คาดหวัง 2%)</option>
           </select>
         </div>
         <div class="field"><label>แผนที่ต้องการสลับไป</label>
           <select id="swTo">
-            <option value="1">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
-            <option value="2">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
-            <option value="3">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
-            <option value="4">แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
-            <option value="5" selected>แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
-            <option value="6">แผนตราสารหนี้ (คาดหวัง 3%)</option>
-            <option value="7">แผนทองคำ (คาดหวัง 7%)</option>
+            <option value="1">แผนเงินฝากและตราสารหนี้ระยะสั้น (คาดหวัง 2%)</option>
+            <option value="2">แผนตราสารหนี้ (คาดหวัง 3%)</option>
+            <option value="3">แผนตราสารหนี้ต่างประเทศ (คาดหวัง 2.5%)</option>
+            <option value="4">แผนกองทุนรวมวายุภักษ์ (คาดหวัง 4%)</option>
+            <option value="5">แผนลงทุนพื้นฐานทั่วไป (คาดหวัง 3.5%)</option>
+            <option value="6">แผนเชิงรุก 20 (คาดหวัง 3.5%)</option>
+            <option value="7">แผนเชิงรุก 35 (คาดหวัง 4.5%)</option>
+            <option value="8">แผนเชิงรุก 65 (คาดหวัง 5.5%)</option>
+            <option value="9">แผนสมดุลตามอายุ (ใหม่) (คาดหวัง 4%)</option>
+            <option value="10">แผนหุ้นไทย (คาดหวัง 2% — Max DD -37.58%)</option>
+            <option value="11" selected>แผนหุ้นต่างประเทศ (คาดหวัง 8%)</option>
+            <option value="12">แผนกองทุนอสังหาริมทรัพย์ไทย (คาดหวัง 3.5%)</option>
+            <option value="13">แผนทองคำ (คาดหวัง 7%)</option>
+            <option value="14">แผนการลงทุนตามหลักชะรีอะฮ์ (คาดหวัง 5%)</option>
+            <option value="15">แผนเกษียณสบายใจ 2569 (คาดหวัง 2%)</option>
           </select>
         </div>
         <div class="field"><label>เงินในกองทุนตอนนี้ (บาท)</label><input type="number" id="swAmt" value="599315"></div>
@@ -254,9 +273,23 @@ td:first-child{text-align:left}
     <div class="sec-head"><div class="sec-icon">🤖</div><h2>AI แนะนำแผนการลงทุน — วิเคราะห์จากโปรไฟล์ของคุณ</h2></div>
     <div class="sec-body">
       <div class="ai-setup">
-        <label>🔑 Anthropic API Key (จาก console.anthropic.com)</label>
-        <input type="password" id="aiKey" placeholder="sk-ant-api03-..." autocomplete="off">
-        <div style="font-size:10px;color:var(--tx3);margin-top:5px">Key จะใช้เฉพาะในเบราว์เซอร์นี้ ไม่ถูกส่งไปที่อื่น</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <label style="margin-bottom:0;font-size:12px;font-weight:500;color:var(--tx)">วิธีเรียก AI:</label>
+          <div style="display:flex;gap:5px">
+            <button class="cr-ps on" id="modeGAS" onclick="setAIMode('gas',this)">🔒 ผ่าน GAS (แนะนำ)</button>
+            <button class="cr-ps" id="modeDirect" onclick="setAIMode('direct',this)">🔑 ใส่ Key เอง</button>
+          </div>
+        </div>
+        <div id="gasMode">
+          <label>GAS Proxy URL (URL เดียวกับที่ใช้ดึง NAV)</label>
+          <input type="text" id="gasUrl" placeholder="https://script.google.com/macros/s/.../exec" value="https://script.google.com/macros/s/AKfycbyIlh0BRAANNW-O-swqd5itoaHy3L4zHMBN7UeFcWo8o56ZrBqlNoC3h168LyhUumWVmQ/exec" autocomplete="off">
+          <div style="font-size:10px;color:var(--tx3);margin-top:4px">ใช้ GAS URL เดิมที่มีอยู่แล้ว — AI Key เก็บใน GAS ปลอดภัยกว่า</div>
+        </div>
+        <div id="directMode" style="display:none">
+          <label>Anthropic API Key</label>
+          <input type="password" id="aiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+          <div style="font-size:10px;color:var(--tx3);margin-top:4px">Key จะใช้เฉพาะในเบราว์เซอร์นี้</div>
+        </div>
       </div>
 
       <h3 style="font-size:12px;color:var(--tx3);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px">ข้อมูลส่วนตัว</h3>
@@ -323,13 +356,21 @@ td:first-child{text-align:left}
 <script>
 // ════════════ DATA ════════════
 const PLAN_DATA = {
-  1: {name:"แผนลงทุนพื้นฐานทั่วไป", ret:3.5, dd:-5.46, color:"#4f8ef7"},
-  2: {name:"แผนเชิงรุก 20",          ret:3.5, dd:-4.82, color:"#ff7340"},
-  3: {name:"แผนเชิงรุก 35",          ret:4.5, dd:-8.13, color:"#f5973a"},
-  4: {name:"แผนเชิงรุก 65",          ret:5.5, dd:-12.39,color:"#e879a0"},
-  5: {name:"แผนหุ้นต่างประเทศ",      ret:8.0, dd:-23.57,color:"#d4923a"},
-  6: {name:"แผนตราสารหนี้",          ret:3.0, dd:-2.43, color:"#8b92a8"},
-  7: {name:"แผนทองคำ",               ret:7.0, dd:-8.48, color:"#f5c842"},
+  1:  {name:"แผนเงินฝากและตราสารหนี้ระยะสั้น", ret:2.0, dd:-0.02,  color:"#6ab7d4"},
+  2:  {name:"แผนตราสารหนี้",                   ret:3.0, dd:-2.43,  color:"#8b92a8"},
+  3:  {name:"แผนตราสารหนี้ต่างประเทศ",         ret:2.5, dd:-5.30,  color:"#c76fba"},
+  4:  {name:"แผนกองทุนรวมวายุภักษ์",           ret:4.0, dd:-4.18,  color:"#5fbb6e"},
+  5:  {name:"แผนลงทุนพื้นฐานทั่วไป",          ret:3.5, dd:-5.46,  color:"#4f8ef7"},
+  6:  {name:"แผนเชิงรุก 20",                   ret:3.5, dd:-4.82,  color:"#ff7340"},
+  7:  {name:"แผนเชิงรุก 35",                   ret:4.5, dd:-8.13,  color:"#f5973a"},
+  8:  {name:"แผนเชิงรุก 65",                   ret:5.5, dd:-12.39, color:"#e879a0"},
+  9:  {name:"แผนสมดุลตามอายุ (ใหม่)",         ret:4.0, dd:-5.10,  color:"#9b7be8"},
+  10: {name:"แผนหุ้นไทย",                      ret:2.0, dd:-37.58, color:"#34d87a"},
+  11: {name:"แผนหุ้นต่างประเทศ",               ret:8.0, dd:-23.57, color:"#d4923a"},
+  12: {name:"แผนกองทุนอสังหาริมทรัพย์ไทย",    ret:3.5, dd:-26.87, color:"#5b8df5"},
+  13: {name:"แผนทองคำ",                        ret:7.0, dd:-8.48,  color:"#f5c842"},
+  14: {name:"แผนการลงทุนตามหลักชะรีอะฮ์",     ret:5.0, dd:-9.59,  color:"#4ec9c9"},
+  15: {name:"แผนเกษียณสบายใจ 2569",           ret:2.0, dd:-0.01,  color:"#9b7be8"},
 };
 const fB = n=>n.toLocaleString("th-TH",{minimumFractionDigits:0,maximumFractionDigits:0});
 const fM = n=>(n/1e6).toFixed(2)+"M";
@@ -498,8 +539,31 @@ function calcSwitch(){
 }
 
 // ════════════ AI ADVISOR ════════════
+let AI_MODE = "gas";
+
+function setAIMode(mode, el){
+  AI_MODE = mode;
+  document.querySelectorAll("#modeGAS,#modeDirect").forEach(b=>b.classList.remove("on"));
+  el.classList.add("on");
+  document.getElementById("gasMode").style.display    = mode==="gas"?"block":"none";
+  document.getElementById("directMode").style.display = mode==="direct"?"block":"none";
+}
+
+// โหลด GAS URL จาก localStorage ถ้ามี
+window.addEventListener("load", ()=>{
+  const saved = localStorage.getItem("gpf_gas_url");
+  const defaultUrl = "https://script.google.com/macros/s/AKfycbyIlh0BRAANNW-O-swqd5itoaHy3L4zHMBN7UeFcWo8o56ZrBqlNoC3h168LyhUumWVmQ/exec";
+  document.getElementById("gasUrl").value = saved || defaultUrl;
+});
+
 async function runAI(){
-  const key  = document.getElementById("aiKey").value.trim();
+  // บันทึก GAS URL
+  const gasUrl = (document.getElementById("gasUrl")||{}).value?.trim();
+  if(gasUrl) localStorage.setItem("gpf_gas_url", gasUrl);
+
+  const key  = AI_MODE==="direct"
+    ? document.getElementById("aiKey")?.value?.trim()
+    : "";
   const age  = document.getElementById("aiAge").value;
   const retAge = document.getElementById("aiRetireAge").value;
   const amt  = document.getElementById("aiAmt").value;
@@ -509,7 +573,8 @@ async function runAI(){
   const mkt  = document.getElementById("aiMarket").value;
   const goal = document.getElementById("aiGoal").value;
 
-  if(!key){alert("กรุณากรอก API Key ก่อนครับ");return;}
+  if(AI_MODE==="direct" && !key){alert("กรุณากรอก API Key ก่อนครับ");return;}
+  if(AI_MODE==="gas" && !gasUrl){alert("กรุณากรอก GAS URL ก่อนครับ");return;}
 
   const resEl = document.getElementById("aiResult");
   const bodyEl = document.getElementById("aiBody");
@@ -551,26 +616,41 @@ ${goal ? "- เป้าหมาย/ข้อมูลเพิ่มเติ�
 ตอบให้กระชับ ได้ใจความ ใช้ภาษาราชการที่เข้าใจง่าย ไม่ต้องใส่คำเตือนซ้ำซ้อน`;
 
   try{
-    const res = await fetch("https://api.anthropic.com/v1/messages",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-api-key":key,
-        "anthropic-version":"2023-06-01",
-        "anthropic-dangerous-direct-browser-access":"true"
-      },
-      body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",
-        max_tokens:1500,
-        messages:[{role:"user",content:prompt}]
-      })
-    });
-    if(!res.ok){
-      const err=await res.json().catch(()=>({}));
-      throw new Error(err?.error?.message||"HTTP "+res.status);
+    let text = "";
+    if(AI_MODE==="gas"){
+      // เรียกผ่าน GAS proxy (Key อยู่ใน GAS ปลอดภัย)
+      const res = await fetch(gasUrl, {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ prompt, max_tokens:1500 })
+      });
+      if(!res.ok) throw new Error("GAS HTTP "+res.status);
+      const result = await res.json();
+      if(!result.ok) throw new Error(result.error||"GAS error");
+      text = result.data?.content?.find(b=>b.type==="text")?.text||"ไม่ได้รับคำตอบ";
+    } else {
+      // เรียกตรงจาก browser (Direct mode)
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-api-key":key,
+          "anthropic-version":"2023-06-01",
+          "anthropic-dangerous-direct-browser-access":"true"
+        },
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:1500,
+          messages:[{role:"user",content:prompt}]
+        })
+      });
+      if(!res.ok){
+        const err=await res.json().catch(()=>({}));
+        throw new Error(err?.error?.message||"HTTP "+res.status);
+      }
+      const data = await res.json();
+      text = data.content?.find(b=>b.type==="text")?.text||"ไม่ได้รับคำตอบ";
     }
-    const data = await res.json();
-    const text = data.content?.find(b=>b.type==="text")?.text||"ไม่ได้รับคำตอบ";
     resEl.classList.remove("loading");
     bodyEl.textContent=text;
   }catch(e){
